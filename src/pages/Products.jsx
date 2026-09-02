@@ -1,36 +1,123 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
-import { ProductCard, cleanName } from '../components/ProductCard';
+import { ProductCard, categoryName, cleanName, formatProductPrice, getProductPriceAmount, handleProductImageError } from '../components/ProductCard';
 import { categoryMenu, translations } from '../data';
 import { useProducts } from '../useProducts';
 import { SEO } from '../components/SEO';
 
 const catalogSchema = { '@context': 'https://schema.org', '@type': 'CollectionPage', name: 'Kinsengs Wellness Collection', url: 'https://kinsengs.com/products', description: 'A curated collection of dietary supplements and wellness products available with personal guidance.', inLanguage: 'en-US', isPartOf: { '@type': 'WebSite', name: 'Kinsengs', url: 'https://kinsengs.com/' } };
 
-export function Products({ onConsult }) {
+function productMatchesQuery(product, query) {
+  if (!query) return true;
+  const searchable = [
+    cleanName(product.name),
+    product.sku,
+    product.categories?.map((item) => translations[item.name] || item.name).join(' '),
+    formatProductPrice(product),
+  ].filter(Boolean).join(' ').toLowerCase();
+  return searchable.includes(query.toLowerCase());
+}
+
+export function Products() {
   const [params, setParams] = useSearchParams();
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [searchPending, setSearchPending] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [availability, setAvailability] = useState('all');
+  const [saleOnly, setSaleOnly] = useState(false);
+  const [sort, setSort] = useState('featured');
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const category = params.get('category') || params.get('nhom') || 'all';
   const page = Math.max(1, Number(params.get('page')) || 1);
   const perPage = 12;
   const { products, loading, isFallback } = useProducts();
   const root = useRef(null);
+
   const categories = useMemo(() => {
     const map = new Map();
-    products.forEach((p) => p.categories?.forEach((c) => map.set(c.slug, translations[c.name] || c.name)));
+    products.forEach((product) => product.categories?.forEach((item) => map.set(item.slug, translations[item.name] || item.name)));
     const known = new Map(categoryMenu.map(([slug, name]) => [slug, name]));
     map.forEach((name, slug) => known.set(slug, name));
     return [...known.entries()];
   }, [products]);
-  const filtered = useMemo(() => products.filter((p) => {
-    const matchesCategory = category === 'all' || p.categories?.some((c) => c.slug === category);
-    const matchesQuery = cleanName(p.name).toLowerCase().includes(query.toLowerCase());
-    return matchesCategory && matchesQuery;
-  }), [products, category, query]);
+
+  const priceRange = useMemo(() => {
+    const values = products.map((product) => getProductPriceAmount(product)).filter((value) => value !== null);
+    return { min: values.length ? Math.floor(Math.min(...values)) : 0, max: values.length ? Math.ceil(Math.max(...values)) : 0 };
+  }, [products]);
+
+  useEffect(() => {
+    const nextQuery = query.trim();
+    if (!nextQuery) {
+      setDebouncedQuery('');
+      setSearchPending(false);
+      return undefined;
+    }
+    setSearchPending(true);
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(nextQuery);
+      setSearchPending(false);
+    }, 2000);
+    return () => window.clearTimeout(timer);
+  }, [query]);
+
+  const suggestions = useMemo(() => {
+    if (!debouncedQuery) return [];
+    return products
+      .filter((product) => productMatchesQuery(product, debouncedQuery))
+      .sort((a, b) => {
+        const aStarts = cleanName(a.name).toLowerCase().startsWith(debouncedQuery.toLowerCase());
+        const bStarts = cleanName(b.name).toLowerCase().startsWith(debouncedQuery.toLowerCase());
+        return Number(bStarts) - Number(aStarts);
+      })
+      .slice(0, 6);
+  }, [products, debouncedQuery]);
+
+  const filtered = useMemo(() => {
+    const minimum = minPrice === '' ? -Infinity : Number(minPrice);
+    const maximum = maxPrice === '' ? Infinity : Number(maxPrice);
+    const matches = products.filter((product) => {
+      const price = getProductPriceAmount(product);
+      const matchesCategory = category === 'all' || product.categories?.some((item) => item.slug === category);
+      const matchesPrice = price === null ? minPrice === '' && maxPrice === '' : price >= minimum && price <= maximum;
+      const matchesAvailability = availability === 'all' || (availability === 'in-stock' ? product.is_in_stock !== false : product.is_in_stock === false);
+      return matchesCategory && matchesPrice && matchesAvailability && (!saleOnly || product.on_sale) && productMatchesQuery(product, debouncedQuery);
+    });
+    return matches.sort((a, b) => {
+      if (sort === 'name-asc') return cleanName(a.name).localeCompare(cleanName(b.name));
+      if (sort === 'price-asc') return getProductPriceAmount(a) - getProductPriceAmount(b);
+      if (sort === 'price-desc') return getProductPriceAmount(b) - getProductPriceAmount(a);
+      if (sort === 'latest') return Number(b.id) - Number(a.id);
+      return 0;
+    });
+  }, [products, category, debouncedQuery, minPrice, maxPrice, availability, saleOnly, sort]);
+
   const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
-  const visibleProducts = filtered.slice((Math.min(page, totalPages) - 1) * perPage, Math.min(page, totalPages) * perPage);
+  const currentPage = Math.min(page, totalPages);
+  const visibleProducts = filtered.slice((currentPage - 1) * perPage, currentPage * perPage);
+  const activeFilterCount = Number(category !== 'all') + Number(minPrice !== '') + Number(maxPrice !== '') + Number(availability !== 'all') + Number(saleOnly);
+
+  const pageItems = useMemo(() => {
+    const items = [];
+    const push = (value) => { if (!items.includes(value) && value >= 1 && value <= totalPages) items.push(value); };
+    push(1);
+    if (totalPages <= 7) { for (let i = 2; i <= totalPages; i++) push(i); }
+    else {
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+      if (start > 2) push('start-ellipsis');
+      for (let i = start; i <= end; i++) push(i);
+      if (end < totalPages - 1) push('end-ellipsis');
+      push(totalPages);
+    }
+    return items;
+  }, [totalPages, currentPage]);
+
   const goToPage = (nextPage) => {
     const next = {};
     if (category !== 'all') next.category = category;
@@ -38,12 +125,31 @@ export function Products({ onConsult }) {
     setParams(next);
     document.querySelector('.catalog')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+  const chooseCategory = (nextCategory) => setParams(nextCategory === 'all' ? {} : { category: nextCategory });
+  const clearSearch = () => {
+    setQuery('');
+    setDebouncedQuery('');
+    setSearchPending(false);
+    setSearchOpen(false);
+  };
+  const clearFilters = () => {
+    setParams({});
+    setMinPrice('');
+    setMaxPrice('');
+    setAvailability('all');
+    setSaleOnly(false);
+  };
+
   useEffect(() => {
     if (page > totalPages) goToPage(totalPages);
   }, [page, totalPages]);
   useEffect(() => {
+    if (page > 1) setParams(category === 'all' ? {} : { category }, { replace: true });
+  }, [debouncedQuery, minPrice, maxPrice, availability, saleOnly, sort]);
+  useEffect(() => {
     if (!loading) gsap.fromTo('.catalog-grid .product-card', { y: 35, opacity: 0 }, { y: 0, opacity: 1, duration: .7, stagger: .035, ease: 'power3.out' });
-  }, [category, query, loading]);
+  }, [category, debouncedQuery, minPrice, maxPrice, availability, saleOnly, sort, loading]);
+
   return (
     <div className="catalog-page" ref={root}>
       <SEO title="Wellness Products" description="Browse Kinsengs dietary supplements by wellness need. Explore ingredients, directions, and call (346) 347-5571 for personal product guidance." path="/products" schema={catalogSchema} />
@@ -51,18 +157,48 @@ export function Products({ onConsult }) {
       <section className="catalog shell">
         <div className="catalog-tools">
           <div className="catalog-title"><span>{loading ? 'Loading' : `${filtered.length} products`}</span><h2>The collection</h2></div>
-          <label className="search-field"><Search size={18} /><input value={query} onChange={(e) => { setQuery(e.target.value); if (page > 1) goToPage(1); }} placeholder="Search by product name..." />{query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={16} /></button>}</label>
+          <div className="catalog-search" onFocus={() => setSearchOpen(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false); }}>
+            <label className="search-field"><Search size={19} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, category, SKU or price..." />{query && <button type="button" onClick={clearSearch} aria-label="Clear search"><X size={16} /></button>}</label>
+            {searchPending && <span className="search-pending" aria-live="polite">Finding products...</span>}
+            {searchOpen && !searchPending && debouncedQuery && <div className="search-suggestions">
+              <div className="suggestions-heading"><span>Suggested products</span><small>{suggestions.length} matches</small></div>
+              {suggestions.map((product) => {
+                const productPrice = formatProductPrice(product);
+                return <Link key={product.id} to={`/products/${product.slug}`} onClick={() => setSearchOpen(false)}>
+                  <span className="suggestion-image"><img src={product.images?.[0]?.thumbnail || product.images?.[0]?.src} alt="" onError={handleProductImageError} /></span>
+                  <span className="suggestion-copy"><strong>{cleanName(product.name)}</strong><small>{categoryName(product)}</small></span>
+                  {productPrice && <span className="suggestion-price">{productPrice}</span>}
+                </Link>;
+              })}
+              {!suggestions.length && <div className="suggestions-empty">No product matches “{debouncedQuery}”. Try another name, category, SKU, or price.</div>}
+            </div>}
+          </div>
         </div>
-        <div className="filter-row" aria-label="Filter by category">
-          <SlidersHorizontal size={17} /><button className={category === 'all' ? 'active' : ''} onClick={() => setParams({})}>All</button>
-          {categories.map(([slug, name]) => <button key={slug} className={category === slug ? 'active' : ''} onClick={() => setParams({ category: slug })}>{name}</button>)}
+
+        <div className="catalog-toolbar">
+          <button className="filter-toggle" type="button" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen} aria-controls="catalog-filters"><SlidersHorizontal size={17} /> Filters {activeFilterCount > 0 && <span>{activeFilterCount}</span>}</button>
+          <label className="sort-field"><span>Sort by</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="featured">Featured</option><option value="latest">Newest</option><option value="name-asc">Name A–Z</option><option value="price-asc">Price: low to high</option><option value="price-desc">Price: high to low</option></select></label>
         </div>
+
         {isFallback && <p className="api-notice">The live catalog is temporarily unavailable. A selection of featured products is shown below.</p>}
-        <div className="product-grid catalog-grid">
-          {loading ? [...Array(12)].map((_, i) => <div className="product-skeleton" key={i} />) : visibleProducts.map((p) => <ProductCard key={p.id} product={p} />)}
+        <div className="catalog-layout">
+          <aside id="catalog-filters" className={`catalog-filters ${filtersOpen ? 'is-open' : ''}`}>
+            <div className="filters-heading"><div><SlidersHorizontal size={17} /><strong>Refine selection</strong></div>{activeFilterCount > 0 && <button type="button" onClick={clearFilters}>Clear all</button>}</div>
+            <div className="filter-group"><label htmlFor="category-filter">Category</label><select id="category-filter" value={category} onChange={(event) => chooseCategory(event.target.value)}><option value="all">All categories</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
+            <fieldset className="filter-group price-filter"><legend>Price range</legend><div><label><span>Min</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder={`$${priceRange.min}`} /></label><i>—</i><label><span>Max</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder={`$${priceRange.max}`} /></label></div></fieldset>
+            <fieldset className="filter-group option-filter"><legend>Availability</legend><label><input type="radio" name="availability" value="all" checked={availability === 'all'} onChange={(event) => setAvailability(event.target.value)} /><span>All products</span></label><label><input type="radio" name="availability" value="in-stock" checked={availability === 'in-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>In stock</span></label><label><input type="radio" name="availability" value="out-of-stock" checked={availability === 'out-of-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>Out of stock</span></label></fieldset>
+            <fieldset className="filter-group option-filter"><legend>Offers</legend><label><input type="checkbox" checked={saleOnly} onChange={(event) => setSaleOnly(event.target.checked)} /><span>On sale only</span></label></fieldset>
+          </aside>
+
+          <div className="catalog-results">
+            <div className="results-summary"><span>Showing <strong>{visibleProducts.length}</strong> of <strong>{filtered.length}</strong> products</span>{debouncedQuery && <button type="button" onClick={clearSearch}>Search: “{debouncedQuery}” <X size={13} /></button>}</div>
+            <div className="product-grid catalog-grid">
+              {loading ? [...Array(12)].map((_, index) => <div className="product-skeleton" key={index} />) : visibleProducts.map((product) => <ProductCard key={product.id} product={product} />)}
+            </div>
+            {!loading && totalPages > 1 && <nav className="pagination" aria-label="Product pagination"><button onClick={() => goToPage(page - 1)} disabled={page <= 1} aria-label="Previous page"><ChevronLeft /></button>{pageItems.map((item) => typeof item === 'string' ? <span className="pagination-ellipsis" key={item} aria-hidden="true">…</span> : <button key={item} className={page === item ? 'active' : ''} onClick={() => goToPage(item)} aria-label={`Page ${item}`} aria-current={page === item ? 'page' : undefined}>{String(item).padStart(2, '0')}</button>)}<button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} aria-label="Next page"><ChevronRight /></button></nav>}
+            {!loading && !filtered.length && <div className="empty-state"><Sparkles /><h3>No matching products found</h3><p>Adjust your filters, try another search, or call Kinsengs for guidance.</p><button className="outline-button" type="button" onClick={() => { clearFilters(); clearSearch(); }}>Clear search & filters</button></div>}
+          </div>
         </div>
-        {!loading && totalPages > 1 && <nav className="pagination" aria-label="Product pagination"><button onClick={() => goToPage(page - 1)} disabled={page <= 1} aria-label="Previous page"><ChevronLeft /></button>{[...Array(totalPages)].map((_, i) => <button key={i + 1} className={page === i + 1 ? 'active' : ''} onClick={() => goToPage(i + 1)} aria-label={`Page ${i + 1}`} aria-current={page === i + 1 ? 'page' : undefined}>{String(i + 1).padStart(2, '0')}</button>)}<button onClick={() => goToPage(page + 1)} disabled={page >= totalPages} aria-label="Next page"><ChevronRight /></button></nav>}
-        {!loading && !filtered.length && <div className="empty-state"><Sparkles /><h3>No matching products found</h3><p>Try another search or let Kinsengs guide you.</p><button className="button" onClick={onConsult}>Request guidance</button></div>}
       </section>
     </div>
   );

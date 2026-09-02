@@ -25,10 +25,10 @@ export const heroSlides = [
 ];
 
 export const fallbackProducts = [
-  { id: 107, name: 'NMN+', slug: 'nmn-2', sku: '', description: '', short_description: '', categories: [{ name: 'General Health', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/nmn-2.png' }] },
-  { id: 91, name: 'Premium Cordyceps', slug: 'premium-cordyceps', sku: '', description: '', short_description: '', categories: [{ name: 'Energy & Vitality', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-05.jpg' }] },
-  { id: 89, name: 'MV Herbs Red Lingzhi', slug: 'mv-herbs-red-lingzhi', sku: '', description: '', short_description: '', categories: [{ name: 'Daily Balance', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-11.jpg' }] },
-  { id: 55, name: 'Royal Collagen CoQ10', slug: 'royal-collagen-coq10', sku: 'TN-13', description: '', short_description: '', categories: [{ name: 'Hair, Skin & Nails', slug: 'hair-nail-and-skin' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-13.jpg' }] },
+  { id: 107, name: 'NMN+', slug: 'nmn-2', sku: '', description: '', short_description: '', prices: { price: '0', regular_price: '0', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ name: 'General Health', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/nmn-2.png' }] },
+  { id: 91, name: 'Premium Cordyceps', slug: 'premium-cordyceps', sku: '', description: '', short_description: '', prices: { price: '0', regular_price: '0', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ name: 'Energy & Vitality', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-05.jpg' }] },
+  { id: 89, name: 'MV Herbs Red Lingzhi', slug: 'mv-herbs-red-lingzhi', sku: '', description: '', short_description: '', prices: { price: '8500', regular_price: '8500', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ name: 'Daily Balance', slug: 'general-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-11.jpg' }] },
+  { id: 55, name: 'Royal Collagen CoQ10', slug: 'royal-collagen-coq10', sku: 'TN-13', description: '', short_description: '', prices: { price: '7000', regular_price: '7000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ name: 'Hair, Skin & Nails', slug: 'hair-nail-and-skin' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-13.jpg' }] },
 ];
 
 export const needMap = [

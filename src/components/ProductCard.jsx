@@ -21,7 +21,29 @@ export function handleProductImageError(event) {
   image.src = 'https://kinsengs.com/wp-content/uploads/2026/09/logo-Kinsengs-1.png';
 }
 
+export function getProductPriceAmount(product, field = 'price') {
+  const storePrice = product.prices?.[field];
+  const rawPrice = storePrice ?? product[field];
+  if (rawPrice === undefined || rawPrice === null || rawPrice === '') return null;
+
+  const minorUnit = storePrice !== undefined ? Number(product.prices.currency_minor_unit ?? 2) : 0;
+  const amount = Number(rawPrice) / (10 ** minorUnit);
+  return Number.isFinite(amount) ? amount : null;
+}
+
+export function formatProductPrice(product, field = 'price') {
+  const amount = getProductPriceAmount(product, field);
+  if (amount === null || amount <= 0) return null;
+
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: product.prices?.currency_code || 'USD',
+  }).format(amount);
+}
+
 export function ProductCard({ product, featured = false }) {
+  const price = formatProductPrice(product);
+  const regularPrice = product.on_sale ? formatProductPrice(product, 'regular_price') : null;
   return (
     <article className={`product-card ${featured ? 'featured' : ''}`}>
       <Link to={`/products/${product.slug}`} className="product-image-wrap" aria-label={`View ${cleanName(product.name)}`}>
@@ -32,7 +54,10 @@ export function ProductCard({ product, featured = false }) {
       <div className="product-meta">
         <span>{categoryName(product)}</span>
         <Link to={`/products/${product.slug}`}><h3>{cleanName(product.name)}</h3></Link>
-        <Link className="text-link" to={`/products/${product.slug}`}>Discover product <ArrowUpRight size={14} /></Link>
+        <div className="product-meta-footer">
+          {price && <div className="product-price">{regularPrice && <del>{regularPrice}</del>}<strong>{price}</strong></div>}
+          <Link className="text-link" to={`/products/${product.slug}`}>Discover <ArrowUpRight size={14} /></Link>
+        </div>
       </div>
     </article>
   );
