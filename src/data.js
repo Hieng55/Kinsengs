@@ -39,15 +39,22 @@ export const needMap = [
 ];
 
 export const categoryMenu = [
+  ['tolip', 'All Tolip', 'All products from the Tolip house.'],
   ['health-tolip', 'Tolip / Health', 'All Tolip health products.'],
+  ['hearbal', 'All Hearbal', 'All products from the Hearbal house.'],
   ['beauty', 'Hearbal / Beauty', 'All Hearbal beauty products.'],
   ['health', 'Hearbal / Health', 'All Hearbal health products.'],
   ['general-health', 'General Health', 'Everyday foundations for lasting vitality.'],
   ['bone-and-joint-health', 'Bone & Joint', 'Support comfortable, confident movement.'],
   ['hair-nail-and-skin', 'Hair, Skin & Nails', 'Beauty rituals designed from within.'],
   ['heart-health', 'Heart Health', 'Thoughtful support for cardiovascular wellness.'],
+  ['hemorrhoid-relief', 'Hemorrhoid Relief', 'Focused support for personal comfort.'],
+  ['immune-support', 'Immune Support', 'Everyday immune wellness support.'],
+  ['liver-health', 'Liver Health', 'Selected support for liver wellness.'],
   ['detox-and-cleanse', 'Detox & Cleanse', 'Botanical approaches to daily balance.'],
   ['weight-management', 'Weight Management', 'Mindful support for healthy routines.'],
+  ['men-health', "Men's Health", 'Wellness options selected for men.'],
+  ['women-health', "Women's Health", 'Wellness options selected for women.'],
   ['sleep-support', 'Sleep Support', 'Unwind into a more restorative rhythm.'],
   ['eye-health', 'Eye Health', 'Daily care for modern visual demands.'],
   ['lung-health', 'Respiratory Health', 'Selected botanicals for respiratory wellness.'],

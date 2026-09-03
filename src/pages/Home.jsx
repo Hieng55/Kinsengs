@@ -37,6 +37,11 @@ export function Home() {
   const [slide, setSlide] = useState(0);
   const [mobileCarousel, setMobileCarousel] = useState(() => window.innerWidth <= 900 || window.matchMedia('(hover: none), (pointer: coarse)').matches);
   const { products, loading } = useProducts();
+  const inCategory = (product, slug) => product.categories?.some((category) => category.slug === slug);
+  const tolipProducts = products.filter((product) => inCategory(product, 'health-tolip'));
+  const hearbalBeautyProducts = products.filter((product) => inCategory(product, 'beauty'));
+  const hearbalHealthProducts = products.filter((product) => inCategory(product, 'health'));
+  const hearbalProducts = [...hearbalBeautyProducts.slice(0, 2), ...hearbalHealthProducts.slice(0, 2)];
   useEffect(() => {
     const mq = window.matchMedia('(hover: none), (pointer: coarse)');
     const update = () => setMobileCarousel(window.innerWidth <= 900 || mq.matches);
@@ -265,14 +270,17 @@ export function Home() {
       </section>
       </div>
 
-      <section className="products-section">
+      <section className="products-section brand-products brand-products-tolip">
         <div className="shell">
-          <div className="section-heading" data-reveal><div><span className="eyebrow">Featured collection</span><h2>Curated for your wellness ritual</h2></div><Link className="outline-button" to="/products">View all <ArrowRight size={16} /></Link></div>
-          <div className="home-product-viewport" role="region" aria-label="Featured products carousel">
-            <div className="product-grid home-products">
-              {loading ? [...Array(4)].map((_, i) => <div className="product-skeleton" key={i} />) : products.slice(0, 8).map((product, i) => <ProductCard key={product.id} product={product} featured={i === 0} />)}
-            </div>
-          </div>
+          <div className="brand-products-head" data-reveal><div><span className="eyebrow">Tolip / Health</span><h2>Focused support for everyday wellbeing.</h2><p>Explore Tolip formulas across vitality, immunity, movement, rest, and more.</p></div><Link className="outline-button" to="/products?category=health-tolip">View Tolip Health <ArrowRight size={16} /></Link></div>
+          <div className="product-grid home-collection-products" data-reveal>{loading ? [...Array(4)].map((_, index) => <div className="product-skeleton" key={index} />) : tolipProducts.slice(0, 4).map((product) => <ProductCard key={product.id} product={product} />)}</div>
+        </div>
+      </section>
+
+      <section className="products-section brand-products brand-products-hearbal">
+        <div className="shell">
+          <div className="brand-products-head" data-reveal><div><span className="eyebrow">Hearbal / Beauty & Health</span><h2>Botanical choices for beauty and vitality.</h2><p>A clear introduction to both Hearbal collections, with every product labeled by its place.</p></div><div className="brand-products-links"><Link to="/products?category=beauty">Beauty</Link><Link to="/products?category=health">Health</Link><Link className="outline-button" to="/products?category=hearbal">View all <ArrowRight size={16} /></Link></div></div>
+          <div className="product-grid home-collection-products" data-reveal>{loading ? [...Array(4)].map((_, index) => <div className="product-skeleton" key={index} />) : hearbalProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div>
         </div>
       </section>
 

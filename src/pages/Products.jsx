@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, Sparkles, X } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
-import { ProductCard, categoryName, cleanName, formatProductPrice, getProductPriceAmount, handleProductImageError } from '../components/ProductCard';
+import { ProductCard, cleanName, formatProductPrice, getProductPriceAmount, handleProductImageError, productTaxonomy } from '../components/ProductCard';
 import { categoryDescendants, categoryMenu, translations } from '../data';
 import { useProducts } from '../useProducts';
 import { SEO } from '../components/SEO';
@@ -45,6 +45,23 @@ export function Products() {
     map.forEach((name, slug) => { if (!known.has(slug)) known.set(slug, name); });
     return [...known.entries()];
   }, [products]);
+  const categoryLabels = new Map(categories);
+  const tolipCategorySlugs = ['tolip', ...categoryDescendants['health-tolip']];
+  const hearbalCategorySlugs = ['hearbal', 'beauty', 'health'];
+  const groupedCategorySlugs = new Set([...tolipCategorySlugs, ...hearbalCategorySlugs]);
+  const tolipCategoryOptions = tolipCategorySlugs.map((slug) => [slug, categoryLabels.get(slug)]).filter(([, name]) => name);
+  const hearbalCategoryOptions = hearbalCategorySlugs.map((slug) => [slug, categoryLabels.get(slug)]).filter(([, name]) => name);
+  const otherCategoryOptions = categories.filter(([slug]) => !groupedCategorySlugs.has(slug));
+  const activeCategoryLabel = categoryLabels.get(category) || category.replaceAll('-', ' ');
+  const activeCategoryPath = category === 'all' ? ['All products']
+    : category === 'tolip' ? ['Tolip']
+      : category === 'health-tolip' ? ['Tolip', 'Health']
+        : categoryDescendants['health-tolip'].includes(category) ? ['Tolip', 'Health', activeCategoryLabel]
+          : category === 'hearbal' ? ['Hearbal']
+            : category === 'beauty' ? ['Hearbal', 'Beauty']
+              : category === 'health' ? ['Hearbal', 'Health']
+                : ['Wellness', activeCategoryLabel];
+  const activeCollectionTitle = category === 'all' ? 'The complete collection' : `${activeCategoryPath.at(-1)} collection`;
 
   const priceRange = useMemo(() => {
     const values = products.map((product) => getProductPriceAmount(product)).filter((value) => value !== null);
@@ -168,7 +185,7 @@ export function Products() {
       <section className="catalog-hero"><div className="shell"><span className="eyebrow light">Kinsengs Collection</span><h1>Curated for a life well lived.</h1><p>Explore by need. Understand every choice. Call us for personal guidance.</p></div></section>
       <section className="catalog shell">
         <div className="catalog-tools">
-          <div className="catalog-title"><span>{loading ? 'Loading' : `${filtered.length} products`}</span><h2>The collection</h2></div>
+          <div className="catalog-title"><span>{loading ? 'Loading collection' : 'Currently viewing'}</span><div className="catalog-category-path">{activeCategoryPath.map((item) => <strong key={item}>{item}</strong>)}</div><h2>{activeCollectionTitle}</h2>{!loading && <p>{filtered.length} carefully presented {filtered.length === 1 ? 'product' : 'products'}</p>}</div>
           <div className="catalog-search" onFocus={() => setSearchOpen(true)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setSearchOpen(false); }}>
             <label className="search-field"><Search size={19} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, category, SKU or price..." />{query && <button type="button" onClick={clearSearch} aria-label="Clear search"><X size={16} /></button>}</label>
             {searchPending && <span className="search-pending" aria-live="polite">Finding products...</span>}
@@ -176,9 +193,11 @@ export function Products() {
               <div className="suggestions-heading"><span>Suggested products</span><small>{suggestions.length} matches</small></div>
               {suggestions.map((product) => {
                 const productPrice = formatProductPrice(product);
+                const taxonomy = productTaxonomy(product);
+                const taxonomyPath = [taxonomy.brand, taxonomy.collection, taxonomy.detail].filter(Boolean).join(' / ');
                 return <Link key={product.id} to={`/products/${product.slug}`} onClick={() => setSearchOpen(false)}>
                   <span className="suggestion-image"><img src={product.images?.[0]?.thumbnail || product.images?.[0]?.src} alt="" onError={handleProductImageError} /></span>
-                  <span className="suggestion-copy"><strong>{cleanName(product.name)}</strong><small>{categoryName(product)}</small></span>
+                  <span className="suggestion-copy"><strong>{cleanName(product.name)}</strong><small>{taxonomyPath}</small></span>
                   {productPrice && <span className="suggestion-price">{productPrice}</span>}
                 </Link>;
               })}
@@ -196,14 +215,14 @@ export function Products() {
         <div className="catalog-layout">
           <aside id="catalog-filters" className={`catalog-filters ${filtersOpen ? 'is-open' : ''}`}>
             <div className="filters-heading"><div><SlidersHorizontal size={17} /><strong>Refine selection</strong></div>{activeFilterCount > 0 && <button type="button" onClick={clearFilters}>Clear all</button>}</div>
-            <div className="filter-group"><label htmlFor="category-filter">Category</label><select id="category-filter" value={category} onChange={(event) => chooseCategory(event.target.value)}><option value="all">All categories</option>{categories.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</select></div>
+            <div className="filter-group"><label htmlFor="category-filter">Brand & category</label><select id="category-filter" value={category} onChange={(event) => chooseCategory(event.target.value)}><option value="all">All products</option><optgroup label="Tolip">{tolipCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'tolip' ? 'All Tolip' : slug === 'health-tolip' ? 'All Health' : name}</option>)}</optgroup><optgroup label="Hearbal">{hearbalCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'hearbal' ? 'All Hearbal' : name.replace('Hearbal / ', '')}</option>)}</optgroup>{otherCategoryOptions.length > 0 && <optgroup label="Other wellness categories">{otherCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</optgroup>}</select></div>
             <fieldset className="filter-group price-filter"><legend>Price range</legend><div><label><span>Min</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder={`$${priceRange.min}`} /></label><i>—</i><label><span>Max</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder={`$${priceRange.max}`} /></label></div></fieldset>
             <fieldset className="filter-group option-filter"><legend>Availability</legend><label><input type="radio" name="availability" value="all" checked={availability === 'all'} onChange={(event) => setAvailability(event.target.value)} /><span>All products</span></label><label><input type="radio" name="availability" value="in-stock" checked={availability === 'in-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>In stock</span></label><label><input type="radio" name="availability" value="out-of-stock" checked={availability === 'out-of-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>Out of stock</span></label></fieldset>
             <fieldset className="filter-group option-filter"><legend>Offers</legend><label><input type="checkbox" checked={saleOnly} onChange={(event) => setSaleOnly(event.target.checked)} /><span>On sale only</span></label></fieldset>
           </aside>
 
           <div className="catalog-results">
-            <div className="results-summary"><span>Showing <strong>{visibleProducts.length}</strong> of <strong>{filtered.length}</strong> products</span>{debouncedQuery && <button type="button" onClick={clearSearch}>Search: “{debouncedQuery}” <X size={13} /></button>}</div>
+            <div className="results-summary"><span>Showing <strong>{visibleProducts.length}</strong> of <strong>{filtered.length}</strong> products in <strong>{activeCategoryPath.join(' / ')}</strong></span>{debouncedQuery && <button type="button" onClick={clearSearch}>Search: “{debouncedQuery}” <X size={13} /></button>}</div>
             <div className="product-grid catalog-grid">
               {loading ? [...Array(12)].map((_, index) => <div className="product-skeleton" key={index} />) : visibleProducts.map((product) => <ProductCard key={product.id} product={product} />)}
             </div>
