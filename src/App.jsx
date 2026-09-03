@@ -36,13 +36,13 @@ function ScrollManager() {
   return null;
 }
 
-function ProductMegaMenu() {
+function ProductMegaMenu({ active = false }) {
   const [activeBrandSlug, setActiveBrandSlug] = useState(null);
   const activeBrand = productMegaMenu.find((brand) => brand.slug === activeBrandSlug);
 
   return (
     <div className="products-nav desktop-products-nav" onMouseLeave={() => setActiveBrandSlug(null)}>
-      <Link to="/products">Products</Link>
+      <Link className={active ? 'is-active' : ''} to="/products" aria-current={active ? 'page' : undefined}>Products</Link>
       <div className="mega-menu catalog-mega">
         <div className="catalog-mega-head">
           <span><Leaf size={14} /> Product houses</span>
@@ -103,7 +103,12 @@ function Header() {
   const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
   const [mobileBrandSlug, setMobileBrandSlug] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const [activeHomeSection, setActiveHomeSection] = useState('home');
   const mobileBrand = productMegaMenu.find((brand) => brand.slug === mobileBrandSlug);
+  const productsActive = location.pathname.startsWith('/products') || location.pathname.startsWith('/san-pham');
+  const homeActive = location.pathname === '/' && activeHomeSection === 'home';
+  const storyActive = location.pathname === '/' && activeHomeSection === 'our-story';
+  const journalActive = location.pathname === '/' && activeHomeSection === 'journal';
   const closeMenu = () => {
     setOpen(false);
     setMobileProductsOpen(false);
@@ -125,6 +130,31 @@ function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
   useEffect(() => {
+    if (location.pathname !== '/') {
+      setActiveHomeSection('home');
+      return undefined;
+    }
+    let frame;
+    const updateActiveSection = () => {
+      const marker = window.scrollY + window.innerHeight * .32;
+      const storyTop = document.querySelector('#our-story')?.offsetTop ?? Infinity;
+      const journalTop = document.querySelector('#journal')?.offsetTop ?? Infinity;
+      setActiveHomeSection(marker >= journalTop ? 'journal' : marker >= storyTop ? 'our-story' : 'home');
+    };
+    const onScroll = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(updateActiveSection);
+    };
+    updateActiveSection();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [location.pathname]);
+  useEffect(() => {
     document.body.classList.toggle('menu-open', open);
     if (open) document.documentElement.style.overflow = 'hidden';
     else document.documentElement.style.overflow = '';
@@ -140,9 +170,9 @@ function Header() {
       </Link>
       <nav className={open ? 'nav-open' : ''} aria-label="Main navigation" aria-expanded={open}>
         <button className="nav-close" onClick={closeMenu} aria-label="Close menu"><X /></button>
-        <Link to="/" onClick={closeMenu}>Home</Link>
-        <ProductMegaMenu />
-        <div className={`mobile-products-menu ${mobileProductsOpen ? 'is-open' : ''}`}>
+        <Link className={homeActive ? 'is-active' : ''} to="/" onClick={closeMenu} aria-current={homeActive ? 'page' : undefined}>Home</Link>
+        <ProductMegaMenu active={productsActive} />
+        <div className={`mobile-products-menu ${mobileProductsOpen ? 'is-open' : ''} ${productsActive ? 'nav-active' : ''}`}>
           <button
             className="mobile-products-trigger"
             type="button"
@@ -180,8 +210,8 @@ function Header() {
             <Link className="mobile-products-all" to="/products" onClick={closeMenu}>View all products <ArrowRight size={14} /></Link>
           </div>
         </div>
-        <a href="/#our-story" onClick={closeMenu}>Our Story</a>
-        <a href="/#journal" onClick={closeMenu}>Journal</a>
+        <a className={storyActive ? 'is-active' : ''} href="/#our-story" onClick={closeMenu} aria-current={storyActive ? 'page' : undefined}>Our Story</a>
+        <a className={journalActive ? 'is-active' : ''} href="/#journal" onClick={closeMenu} aria-current={journalActive ? 'page' : undefined}>Journal</a>
       </nav>
       <div className="header-actions">
         <Link className="icon-button" to="/products" aria-label="Search products"><Search size={19} /></Link>
