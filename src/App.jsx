@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import { Activity, ArrowRight, Bone, Eye, Flower2, HeartPulse, Leaf, Menu, MoonStar, Phone, Scale, Search, Sparkles, Wind, X } from 'lucide-react';
+import { ArrowRight, ArrowUp, ChevronDown, ChevronRight, Flower2, HeartPulse, Leaf, Menu, Phone, Search, Sparkles, X } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
-import { categoryMenu } from './data';
+import { productMegaMenu } from './data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,15 +36,86 @@ function ScrollManager() {
   return null;
 }
 
+function ProductMegaMenu() {
+  const [activeBrandSlug, setActiveBrandSlug] = useState(null);
+  const activeBrand = productMegaMenu.find((brand) => brand.slug === activeBrandSlug);
+
+  return (
+    <div className="products-nav desktop-products-nav" onMouseLeave={() => setActiveBrandSlug(null)}>
+      <Link to="/products">Products</Link>
+      <div className="mega-menu catalog-mega">
+        <div className="catalog-mega-head">
+          <span><Leaf size={14} /> Product houses</span>
+          <Link to="/products">View complete collection <ArrowRight size={14} /></Link>
+        </div>
+        <div className="catalog-mega-layout">
+          <div className="catalog-mega-pane catalog-mega-brands">
+            <span className="catalog-mega-kicker">01 / Choose a house</span>
+            <div className="catalog-brand-list">
+              {productMegaMenu.map((brand, index) => (
+                <button
+                  className={activeBrandSlug === brand.slug ? 'is-active' : ''}
+                  type="button"
+                  key={brand.slug}
+                  onMouseEnter={() => setActiveBrandSlug(brand.slug)}
+                  onFocus={() => setActiveBrandSlug(brand.slug)}
+                  onClick={() => setActiveBrandSlug(brand.slug)}
+                  aria-pressed={activeBrandSlug === brand.slug}
+                >
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                  <strong>{brand.name}</strong>
+                  <ChevronRight size={17} />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="catalog-mega-pane catalog-mega-collections">
+            <span className="catalog-mega-kicker">02 / Choose a collection</span>
+            {activeBrand ? <>
+              <div className="catalog-mega-title"><span>{activeBrand.name}</span></div>
+              <div className="catalog-collection-list">
+                {activeBrand.collections.map((collection) => {
+                  const Icon = collection.slug === 'beauty' ? Flower2 : HeartPulse;
+                  return (
+                    <Link
+                      key={collection.slug}
+                      to={`/products?category=${collection.slug}`}
+                    >
+                      <Icon size={20} />
+                      <strong>{collection.name}</strong>
+                      <ChevronRight size={17} />
+                    </Link>
+                  );
+                })}
+              </div>
+            </> : <div className="catalog-mega-prompt"><span>01</span><p>Hover Tolip or Hearbal.</p></div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Header() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [mobileProductsOpen, setMobileProductsOpen] = useState(false);
+  const [mobileBrandSlug, setMobileBrandSlug] = useState(null);
   const [scrolled, setScrolled] = useState(false);
+  const mobileBrand = productMegaMenu.find((brand) => brand.slug === mobileBrandSlug);
+  const closeMenu = () => {
+    setOpen(false);
+    setMobileProductsOpen(false);
+    setMobileBrandSlug(null);
+  };
   useEffect(() => {
     setOpen(false);
+    setMobileProductsOpen(false);
+    setMobileBrandSlug(null);
   }, [location.pathname, location.hash]);
   useEffect(() => {
-    const onKey = (event) => { if (event.key === 'Escape') setOpen(false); };
+    const onKey = (event) => { if (event.key === 'Escape') closeMenu(); };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, []);
@@ -68,23 +139,49 @@ function Header() {
         <img src="https://kinsengs.com/wp-content/uploads/2026/09/logo-Kinsengs-1.png" alt="Kinsengs" />
       </Link>
       <nav className={open ? 'nav-open' : ''} aria-label="Main navigation" aria-expanded={open}>
-        <button className="nav-close" onClick={() => setOpen(false)} aria-label="Close menu"><X /></button>
-        <Link to="/" onClick={() => setOpen(false)}>Home</Link>
-        <div className="products-nav desktop-products-nav">
-          <Link to="/products">Products</Link>
-          <div className="mega-menu">
-            <div className="mega-intro"><span className="eyebrow">The collection</span><h3>Explore wellness<br />with intention.</h3><p>Begin with a need, then discover the ingredients and guidance behind every choice.</p><Link to="/products">View all products <ArrowRight size={15} /></Link></div>
-            <div className="mega-categories">
-              {categoryMenu.map(([slug, name, copy], index) => {
-                const Icon = [Activity, Bone, Flower2, HeartPulse, Leaf, Scale, MoonStar, Eye, Wind, Leaf, Sparkles][index];
-                return <Link key={slug} to={`/products?category=${slug}`}><Icon /><span><strong>{name}</strong><small>{copy}</small></span></Link>;
-              })}
+        <button className="nav-close" onClick={closeMenu} aria-label="Close menu"><X /></button>
+        <Link to="/" onClick={closeMenu}>Home</Link>
+        <ProductMegaMenu />
+        <div className={`mobile-products-menu ${mobileProductsOpen ? 'is-open' : ''}`}>
+          <button
+            className="mobile-products-trigger"
+            type="button"
+            onClick={() => {
+              setMobileProductsOpen(!mobileProductsOpen);
+              if (mobileProductsOpen) setMobileBrandSlug(null);
+            }}
+            aria-expanded={mobileProductsOpen}
+            aria-controls="mobile-products-dropdown"
+          >
+            <span>Products</span><ChevronDown size={22} />
+          </button>
+          <div className="mobile-products-dropdown" id="mobile-products-dropdown">
+            <span className="mobile-products-label">Choose a house</span>
+            <div className="mobile-product-brands">
+              {productMegaMenu.map((brand) => (
+                <button
+                  className={mobileBrandSlug === brand.slug ? 'is-active' : ''}
+                  type="button"
+                  key={brand.slug}
+                  onClick={() => setMobileBrandSlug(mobileBrandSlug === brand.slug ? null : brand.slug)}
+                  aria-pressed={mobileBrandSlug === brand.slug}
+                >
+                  <strong>{brand.name}</strong><ChevronRight size={17} />
+                </button>
+              ))}
             </div>
+            {mobileBrand && <div className="mobile-product-collections">
+              <span>{mobileBrand.name}</span>
+              {mobileBrand.collections.map((collection) => {
+                const Icon = collection.slug === 'beauty' ? Flower2 : HeartPulse;
+                return <Link key={collection.slug} to={`/products?category=${collection.slug}`} onClick={closeMenu}><Icon size={18} /><strong>{collection.name}</strong><ArrowRight size={15} /></Link>;
+              })}
+            </div>}
+            <Link className="mobile-products-all" to="/products" onClick={closeMenu}>View all products <ArrowRight size={14} /></Link>
           </div>
         </div>
-        <Link className="mobile-products-link" to="/products" onClick={() => setOpen(false)}>Products</Link>
-        <a href="/#our-story" onClick={() => setOpen(false)}>Our Story</a>
-        <a href="/#journal" onClick={() => setOpen(false)}>Journal</a>
+        <a href="/#our-story" onClick={closeMenu}>Our Story</a>
+        <a href="/#journal" onClick={closeMenu}>Journal</a>
       </nav>
       <div className="header-actions">
         <Link className="icon-button" to="/products" aria-label="Search products"><Search size={19} /></Link>
@@ -92,6 +189,29 @@ function Header() {
         <button className="menu-button" onClick={() => setOpen(true)} aria-label="Open menu"><Menu /></button>
       </div>
     </header>
+  );
+}
+
+function FloatingActions() {
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 520);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <div className="floating-actions" aria-label="Quick actions">
+      <a className="floating-action floating-call-action" href="tel:+13463475571" aria-label="Call Kinsengs at 346 347 5571">
+        <span className="floating-action-label">Call Kinsengs</span>
+        <Phone size={21} />
+      </a>
+      {showScrollTop && <button className="floating-action floating-scroll-top" type="button" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} aria-label="Scroll back to top">
+        <span className="floating-action-label">Back to top</span>
+        <ArrowUp size={20} />
+      </button>}
+    </div>
   );
 }
 
@@ -173,7 +293,7 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
-        <a className="mobile-call" href="tel:+13463475571" aria-label="Call Kinsengs"><Phone size={18} /><span>Call for guidance</span></a>
+        <FloatingActions />
       </div>
     </>
   );

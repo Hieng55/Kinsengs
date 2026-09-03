@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Search, SlidersHorizontal, Sparkles, X } fro
 import { Link, useSearchParams } from 'react-router-dom';
 import gsap from 'gsap';
 import { ProductCard, categoryName, cleanName, formatProductPrice, getProductPriceAmount, handleProductImageError } from '../components/ProductCard';
-import { categoryMenu, translations } from '../data';
+import { categoryDescendants, categoryMenu, translations } from '../data';
 import { useProducts } from '../useProducts';
 import { SEO } from '../components/SEO';
 
@@ -35,14 +35,14 @@ export function Products() {
   const category = params.get('category') || params.get('nhom') || 'all';
   const page = Math.max(1, Number(params.get('page')) || 1);
   const perPage = 12;
-  const { products, loading, isFallback } = useProducts();
+  const { products, loading, isFallback } = useProducts(category);
   const root = useRef(null);
 
   const categories = useMemo(() => {
     const map = new Map();
     products.forEach((product) => product.categories?.forEach((item) => map.set(item.slug, translations[item.name] || item.name)));
     const known = new Map(categoryMenu.map(([slug, name]) => [slug, name]));
-    map.forEach((name, slug) => known.set(slug, name));
+    map.forEach((name, slug) => { if (!known.has(slug)) known.set(slug, name); });
     return [...known.entries()];
   }, [products]);
 
@@ -81,9 +81,10 @@ export function Products() {
   const filtered = useMemo(() => {
     const minimum = minPrice === '' ? -Infinity : Number(minPrice);
     const maximum = maxPrice === '' ? Infinity : Number(maxPrice);
+    const selectedCategorySlugs = categoryDescendants[category] || [category];
     const matches = products.filter((product) => {
       const price = getProductPriceAmount(product);
-      const matchesCategory = category === 'all' || product.categories?.some((item) => item.slug === category);
+      const matchesCategory = category === 'all' || product.categories?.some((item) => selectedCategorySlugs.includes(item.slug));
       const matchesPrice = price === null ? minPrice === '' && maxPrice === '' : price >= minimum && price <= maximum;
       const matchesAvailability = availability === 'all' || (availability === 'in-stock' ? product.is_in_stock !== false : product.is_in_stock === false);
       return matchesCategory && matchesPrice && matchesAvailability && (!saleOnly || product.on_sale) && productMatchesQuery(product, debouncedQuery);
@@ -143,6 +144,17 @@ export function Products() {
   useEffect(() => {
     if (page > totalPages) goToPage(totalPages);
   }, [page, totalPages]);
+  useEffect(() => {
+    setQuery('');
+    setDebouncedQuery('');
+    setSearchPending(false);
+    setSearchOpen(false);
+    setMinPrice('');
+    setMaxPrice('');
+    setAvailability('all');
+    setSaleOnly(false);
+    setFiltersOpen(false);
+  }, [category]);
   useEffect(() => {
     if (page > 1) setParams(category === 'all' ? {} : { category }, { replace: true });
   }, [debouncedQuery, minPrice, maxPrice, availability, saleOnly, sort]);

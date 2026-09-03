@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
 import { API_URL, englishProductOverrides, fallbackProducts } from './data';
 
-let cache;
-let pendingRequest;
+const cache = new Map();
+const pendingRequests = new Map();
 
 const applyEnglishOverrides = (items) => items.map((product) => ({
   ...product,
   ...(englishProductOverrides[product.id] || {}),
 }));
 
-function loadProducts() {
-  if (!pendingRequest) {
-    pendingRequest = fetch(`${API_URL}?per_page=100`)
+function loadProducts(category) {
+  if (!pendingRequests.has(category)) {
+    const categoryQuery = category === 'all' ? '' : `&category=${encodeURIComponent(category)}`;
+    const pendingRequest = fetch(`${API_URL}?per_page=100${categoryQuery}`)
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load products');
         return response.json();
@@ -19,35 +20,40 @@ function loadProducts() {
       .then((data) => ({ products: applyEnglishOverrides(data), isFallback: false }))
       .catch(() => ({ products: applyEnglishOverrides(fallbackProducts), isFallback: true }))
       .then((result) => {
-        cache = result;
+        cache.set(category, result);
         return result;
       })
-      .finally(() => { pendingRequest = undefined; });
+      .finally(() => { pendingRequests.delete(category); });
+    pendingRequests.set(category, pendingRequest);
   }
-  return pendingRequest;
+  return pendingRequests.get(category);
 }
 
-export function useProducts() {
-  const [products, setProducts] = useState(cache?.products || []);
-  const [loading, setLoading] = useState(!cache);
-  const [isFallback, setIsFallback] = useState(cache?.isFallback || false);
+export function useProducts(category = 'all') {
+  const categoryKey = category || 'all';
+  const initial = cache.get(categoryKey);
+  const [products, setProducts] = useState(initial?.products || []);
+  const [loading, setLoading] = useState(!initial);
+  const [isFallback, setIsFallback] = useState(initial?.isFallback || false);
 
   useEffect(() => {
-    if (cache) {
-      setProducts(cache.products);
-      setIsFallback(cache.isFallback);
+    const cached = cache.get(categoryKey);
+    if (cached) {
+      setProducts(cached.products);
+      setIsFallback(cached.isFallback);
       setLoading(false);
       return;
     }
     let active = true;
-    loadProducts().then((result) => {
+    setLoading(true);
+    loadProducts(categoryKey).then((result) => {
       if (!active) return;
       setProducts(result.products);
       setIsFallback(result.isFallback);
       setLoading(false);
     });
     return () => { active = false; };
-  }, []);
+  }, [categoryKey]);
 
   return { products, loading, isFallback };
 }

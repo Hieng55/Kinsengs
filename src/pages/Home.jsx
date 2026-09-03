@@ -58,7 +58,6 @@ export function Home() {
           .from('.hero-copy > *', { y: 45, autoAlpha: 0, stagger: .09 })
           .from('.hero-controls, .scroll-cue', { y: 20, autoAlpha: 0, stagger: .08 }, '-=.6');
         gsap.utils.toArray('[data-reveal]').filter((el) => !el.closest('.story-section, .ritual-section, .journal-grid')).forEach((el) => gsap.from(el, { y: 48, opacity: 0, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', fastScrollEnd: true } }));
-        gsap.from('.need-card', { y: 38, duration: .85, stagger: .08, ease: 'power3.out', scrollTrigger: { trigger: '.needs-grid', start: 'top 90%', fastScrollEnd: true } });
         gsap.fromTo('.editorial-frame', { clipPath: 'inset(12% 12% 12% 12% round 28px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', scrollTrigger: { trigger: '.editorial-section', start: 'top 85%', end: 'center 35%', scrub: 1 } });
         gsap.fromTo('.editorial-image', { scale: 1.12, yPercent: -4 }, { scale: 1, yPercent: 5, ease: 'none', scrollTrigger: { trigger: '.editorial-section', start: 'top bottom', end: 'bottom top', scrub: 1 } });
         gsap.from('.intro-index', { rotate: -25, scale: .7, duration: 1.2, ease: 'back.out(1.4)', scrollTrigger: { trigger: '.intro-section', start: 'top 78%', fastScrollEnd: true } });
@@ -93,6 +92,25 @@ export function Home() {
         root.current._splitInstances = splitInstances;
       });
     }, root);
+    media.add('(min-width: 901px) and (prefers-reduced-motion: no-preference)', () => {
+      const cards = gsap.utils.toArray(root.current?.querySelectorAll('.need-card'));
+      if (!cards.length) return;
+      const content = cards.flatMap((card) => [...card.children]);
+      gsap.timeline({ scrollTrigger: { trigger: '.needs-grid', start: 'top 84%', once: true } })
+        .from(cards, { y: (index) => index % 2 ? 96 : 68, autoAlpha: 0, scale: .96, rotate: (index) => [-1.2, .8, -.7, 1.1][index] || 0, transformOrigin: '50% 100%', duration: 1.05, stagger: .11, ease: 'power4.out', clearProps: 'opacity,visibility,transform' })
+        .from(content, { y: 18, autoAlpha: 0, duration: .55, stagger: .035, ease: 'power3.out', clearProps: 'opacity,visibility,transform' }, '-=.72');
+      cards.forEach((card) => {
+        const basePosition = parseFloat(getComputedStyle(card).backgroundPositionY) || 50;
+        gsap.fromTo(card, { backgroundPositionY: `${basePosition - 5}%` }, { backgroundPositionY: `${basePosition + 5}%`, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'bottom top', scrub: .8 } });
+      });
+    });
+    media.add('(max-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
+      gsap.utils.toArray(root.current?.querySelectorAll('.need-card')).forEach((card) => {
+        gsap.timeline({ scrollTrigger: { trigger: card, start: 'top 88%', once: true } })
+          .from(card, { y: 52, autoAlpha: 0, scale: .98, duration: .8, ease: 'power3.out', clearProps: 'opacity,visibility,transform' })
+          .from(card.children, { y: 14, autoAlpha: 0, duration: .48, stagger: .06, ease: 'power3.out', clearProps: 'opacity,visibility,transform' }, '-=.42');
+      });
+    });
     media.add('(min-width: 1001px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)', () => {
       const track = root.current?.querySelector('.testimonial-track');
       const viewport = root.current?.querySelector('.testimonial-viewport');
@@ -241,7 +259,7 @@ export function Home() {
         <div className="shell">
           <div className="section-heading" data-reveal><div><span className="eyebrow">Popular categories</span><h2>Explore popular wellness categories</h2></div><p>Browse a focused selection for everyday vitality, comfortable movement, beauty, and restorative rest.</p></div>
           <div className="needs-grid">
-            {needMap.map(([slug, title, copy, image], index) => { const Icon = [Activity, Bone, Flower2, MoonStar][index]; return <Link key={slug} to={`/products?category=${slug}`} className="need-card" style={{ '--need-image': `url("${image}")` }}><div className="need-top"><span>0{index + 1}</span><Icon /></div><div><h3>{title}</h3><p>{copy}</p></div><ArrowRight /></Link>; })}
+            {needMap.map(([slug, title, copy, image, focus], index) => { const Icon = [Activity, Bone, Flower2, MoonStar][index]; return <Link key={slug} to={`/products?category=${slug}`} className="need-card" style={{ '--need-image': `url("${image}")` }}><div className="need-top"><span className="need-index">0{index + 1} / 04</span><span className="need-icon"><Icon /></span></div><div className="need-card-content"><span className="need-card-focus">{focus}</span><h3>{title}</h3><p>{copy}</p></div><div className="need-card-footer"><span>Explore this focus</span><ArrowRight /></div></Link>; })}
           </div>
         </div>
       </section>
@@ -343,7 +361,7 @@ export function Home() {
       <section id="journal" className="journal shell">
         <div className="section-heading" data-reveal><div><span className="eyebrow">The Kinsengs Journal</span><h2>Understand more. Live well.</h2></div><span className="journal-mark">K.</span></div>
         <div className="journal-grid">
-          <article className="journal-main" data-reveal><div className="journal-image"><img src="https://kinsengs.com/wp-content/uploads/2026/09/mv-scaled.png" alt="A mindful wellness ritual" /></div><span>Wellness guide · 6 min read</span><h3>Where does a sustainable wellness ritual begin?</h3><p>You do not need to change everything in one day. One well-considered choice, practiced consistently, can be a more meaningful beginning.</p></article>
+          <article className="journal-main" data-reveal><div className="journal-image beauty-journal-image"><img src="https://kinsengs.com/wp-content/uploads/2026/09/beauty-girl-with-long-shiny-wavy-hair-beautiful-woman-model-with-curly-hairstyle-scaled.jpg" alt="A woman with long, radiant hair representing a considered beauty and wellness ritual" loading="lazy" /></div><span>Beauty & nutrition · 5 min read</span><h3>What does beauty from within mean in a balanced wellness ritual?</h3><p>Radiance is shaped by the whole routine: thoughtful nutrition, hydration, rest, and choices considered around your individual needs.</p></article>
           <div className="journal-list"><article data-reveal><span>Ingredient knowledge</span><h3>Reading a supplement label: five details worth noticing</h3><ArrowRight /></article><article data-reveal><span>Living in balance</span><h3>Why nutritional needs change throughout different stages of life</h3><ArrowRight /></article><article data-reveal><span>Proactive care</span><h3>When should you consult a professional before use?</h3><ArrowRight /></article></div>
         </div>
       </section>
