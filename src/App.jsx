@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import { ArrowRight, Menu, Phone, Search, Sparkles, X } from 'lucide-react';
+import { Activity, ArrowRight, Bone, Eye, Flower2, HeartPulse, Leaf, Menu, MoonStar, Phone, Scale, Search, Sparkles, Wind, X } from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
+import { categoryMenu } from './data';
 
 gsap.registerPlugin(ScrollTrigger);
+
+function SiteLoader() {
+  return (
+    <div className="site-loader" role="status" aria-live="polite" aria-label="Kinsengs is preparing your wellness experience">
+      <div className="site-loader-content">
+        <img className="site-loader-logo" src="/images/logo-kinsengs.png" alt="Kinsengs" />
+        <p>The art of mindful wellness</p>
+        <div className="site-loader-botanical" aria-hidden="true"><Leaf /><span /><Leaf /></div>
+        <span className="site-loader-preparing">Preparing your experience</span>
+      </div>
+    </div>
+  );
+}
+
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -55,7 +70,19 @@ function Header() {
       <nav className={open ? 'nav-open' : ''} aria-label="Main navigation" aria-expanded={open}>
         <button className="nav-close" onClick={() => setOpen(false)} aria-label="Close menu"><X /></button>
         <Link to="/" onClick={() => setOpen(false)}>Home</Link>
-        <Link to="/products" onClick={() => setOpen(false)}>Products</Link>
+        <div className="products-nav desktop-products-nav">
+          <Link to="/products">Products</Link>
+          <div className="mega-menu">
+            <div className="mega-intro"><span className="eyebrow">The collection</span><h3>Explore wellness<br />with intention.</h3><p>Begin with a need, then discover the ingredients and guidance behind every choice.</p><Link to="/products">View all products <ArrowRight size={15} /></Link></div>
+            <div className="mega-categories">
+              {categoryMenu.map(([slug, name, copy], index) => {
+                const Icon = [Activity, Bone, Flower2, HeartPulse, Leaf, Scale, MoonStar, Eye, Wind, Leaf, Sparkles][index];
+                return <Link key={slug} to={`/products?category=${slug}`}><Icon /><span><strong>{name}</strong><small>{copy}</small></span></Link>;
+              })}
+            </div>
+          </div>
+        </div>
+        <Link className="mobile-products-link" to="/products" onClick={() => setOpen(false)}>Products</Link>
         <a href="/#our-story" onClick={() => setOpen(false)}>Our Story</a>
         <a href="/#journal" onClick={() => setOpen(false)}>Journal</a>
       </nav>
@@ -97,38 +124,57 @@ function Footer() {
         </div>
         <nav aria-label="Footer products"><h4>Explore</h4><Link to="/products">All products</Link><a href="/#shop-by-need">Shop by need</a><a href="/#journal">Wellness journal</a></nav>
         <nav aria-label="Footer company"><h4>Discover</h4><a href="/#our-story">Our philosophy</a><a href="/#testimonials">The experience</a><a href="/#faq">Frequently asked questions</a></nav>
-        <div className="footer-contact"><h4>Contact</h4><a href="mailto:info@kinsengs.com">info@kinsengs.com</a><a href="tel:+13463475571">Call for personal guidance</a><small>We welcome questions before you choose.</small></div>
+        <div className="footer-contact"><h4>Contact</h4><a href="tel:+13463475571">Call for personal guidance</a><small>We welcome questions before you choose.</small></div>
       </div>
-      <div className="footer-note shell"><Sparkles size={20} /><p>Information on this website is provided for educational purposes and does not replace advice from a qualified healthcare professional.</p></div>
       <div className="legal shell">
         <strong>These products are not medicines and are not intended to replace medical treatment.</strong>
-        <span>© {new Date().getFullYear()} Kinsengs. All rights reserved.</span>
+        <span>© {new Date().getFullYear()} Kinsengs. All rights reserved. Design by Tdtransactionsllc.</span>
       </div>
     </footer>
   );
 }
 
 export default function App() {
+  const [siteLoading, setSiteLoading] = useState(true);
+  useEffect(() => {
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    document.body.classList.add('site-loading');
+    root.style.overflow = 'hidden';
+    const timer = window.setTimeout(() => {
+      document.body.classList.remove('site-loading');
+      root.style.overflow = previousOverflow;
+      setSiteLoading(false);
+    }, 2000);
+    return () => {
+      window.clearTimeout(timer);
+      document.body.classList.remove('site-loading');
+      root.style.overflow = previousOverflow;
+    };
+  }, []);
   useEffect(() => {
     const footerTween = gsap.fromTo('.footer-word', { xPercent: 4 }, { xPercent: -10, ease: 'none', scrollTrigger: { trigger: '.footer', start: 'top bottom', end: 'bottom bottom', scrub: 1 } });
     return () => { footerTween.scrollTrigger?.kill(); footerTween.kill(); };
   }, []);
   return (
     <>
-      <ScrollManager />
-      <Header />
-      <main>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/products" element={<Products />} />
-          <Route path="/products/:slug" element={<ProductDetail />} />
-          <Route path="/san-pham" element={<Products />} />
-          <Route path="/san-pham/:slug" element={<ProductDetail />} />
-          <Route path="*" element={<Home />} />
-        </Routes>
-      </main>
-      <Footer />
-      <a className="mobile-call" href="tel:+13463475571" aria-label="Call Kinsengs"><Phone size={18} /><span>Call for guidance</span></a>
+      {siteLoading && <SiteLoader />}
+      <div className="site-view" aria-hidden={siteLoading}>
+        <ScrollManager />
+        <Header />
+        <main>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/products/:slug" element={<ProductDetail />} />
+            <Route path="/san-pham" element={<Products />} />
+            <Route path="/san-pham/:slug" element={<ProductDetail />} />
+            <Route path="*" element={<Home />} />
+          </Routes>
+        </main>
+        <Footer />
+        <a className="mobile-call" href="tel:+13463475571" aria-label="Call Kinsengs"><Phone size={18} /><span>Call for guidance</span></a>
+      </div>
     </>
   );
 }

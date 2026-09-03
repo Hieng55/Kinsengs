@@ -58,6 +58,9 @@ export const testimonialPreviews = [
   { quote: 'A beautifully calm experience, with thoughtful answers to every question I had before choosing.', name: 'Olivia K.', context: 'Kinsengs concierge' },
   { quote: 'I appreciated the honest conversation about what to read on the label and what to ask my healthcare provider.', name: 'Lauren T.', context: 'Ingredient clarity' },
   { quote: 'The website is serene, but the human guidance is what made the experience feel genuinely personal.', name: 'Madison C.', context: 'Phone consultation' },
+  { quote: 'I called with a few questions and came away feeling informed, comfortable, and clear about my next step.', name: 'Natalie B.', context: 'Concierge conversation' },
+  { quote: 'Browsing by wellness need made the collection easy to understand without making the experience feel clinical.', name: 'Grace T.', context: 'Collection discovery' },
+  { quote: 'Every detail felt thoughtful, from the product information to the calm guidance I received before choosing.', name: 'Hannah J.', context: 'Considered selection' },
 ];
 
 export const translations = {

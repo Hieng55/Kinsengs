@@ -14,7 +14,7 @@ gsap.registerPlugin(ScrollTrigger, SplitText);
 const homeSchema = {
   '@context': 'https://schema.org',
   '@graph': [
-    { '@type': 'Organization', '@id': 'https://kinsengs.com/#organization', name: 'Kinsengs', url: 'https://kinsengs.com/', logo: 'https://kinsengs.com/wp-content/uploads/2026/09/logo-Kinsengs-1.png', telephone: '+1-346-347-5571', email: 'info@kinsengs.com' },
+    { '@type': 'Organization', '@id': 'https://kinsengs.com/#organization', name: 'Kinsengs', url: 'https://kinsengs.com/', logo: 'https://kinsengs.com/wp-content/uploads/2026/09/logo-Kinsengs-1.png', telephone: '+1-346-347-5571' },
     { '@type': 'WebSite', '@id': 'https://kinsengs.com/#website', url: 'https://kinsengs.com/', name: 'Kinsengs', publisher: { '@id': 'https://kinsengs.com/#organization' }, inLanguage: 'en-US' },
     { '@type': 'WebPage', '@id': 'https://kinsengs.com/#webpage', url: 'https://kinsengs.com/', name: 'Kinsengs — The Art of Mindful Wellness', isPartOf: { '@id': 'https://kinsengs.com/#website' }, about: { '@id': 'https://kinsengs.com/#organization' }, inLanguage: 'en-US' },
     { '@type': 'FAQPage', mainEntity: [
@@ -77,7 +77,7 @@ export function Home() {
           .from('.ritual-seal', { scale: .55, rotate: -24, autoAlpha: 0, ease: 'back.out(1.5)' }, .05)
           .from('.ritual-copy > .eyebrow, .ritual-copy > h2', { x: 55, autoAlpha: 0, stagger: .08, ease: 'power3.out' }, .08)
           .from('.ritual-copy li', { x: 65, autoAlpha: 0, stagger: .12, ease: 'power3.out' }, .16)
-          .from('.ritual-copy > .button', { y: 25, autoAlpha: 0, ease: 'power3.out' }, .48);
+          .from('.ritual-copy > .button', { y: 16, ease: 'power3.out' }, .16);
 
         gsap.fromTo('.journal-image', { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.25, ease: 'power4.inOut', scrollTrigger: { trigger: '.journal-image', start: 'top 88%', fastScrollEnd: true } });
         gsap.fromTo('.journal-image img', { scale: 1.18, yPercent: -5 }, { scale: 1.06, yPercent: 5, ease: 'none', scrollTrigger: { trigger: '.journal', start: 'top bottom', end: 'bottom top', scrub: 1 } });
@@ -319,13 +319,24 @@ export function Home() {
 
       <section className="ritual-section">
         <div className="ritual-art ritual-photo"><img src="/images/wellness-ritual.jpg" alt="A mindful morning wellness ritual" loading="lazy" /><div className="ritual-seal"><BadgeCheck /><span>Guidance before choice</span></div></div>
-        <div className="ritual-copy" data-reveal><span className="eyebrow">A three-step journey</span><h2>A ritual shaped around you.</h2><ol><li><span>01</span><div><h3>Share your needs</h3><p>Tell us what matters to you and about your current routine.</p></div></li><li><span>02</span><div><h3>Understand your options</h3><p>Explore ingredients, labeled directions, and important considerations.</p></div></li><li><span>03</span><div><h3>Continue with intention</h3><p>Observe how a product fits and seek professional advice when needed.</p></div></li></ol><a className="button" href="tel:+13463475571">Request guidance <ArrowRight size={17} /></a></div>
+        <div className="ritual-copy" data-reveal>
+          <span className="eyebrow">A five-step journey</span>
+          <h2>Your ritual.<br /><em>Considered at every step.</em></h2>
+          <a className="button ritual-cta" href="tel:+13463475571">Begin with guidance <ArrowRight size={17} /></a>
+          <ol>
+            <li><span>01</span><div><h3>Share what matters</h3><p>Tell us about your goals, current routine, and questions.</p></div></li>
+            <li><span>02</span><div><h3>Understand your options</h3><p>Explore ingredients, labeled directions, and key considerations.</p></div></li>
+            <li><span>03</span><div><h3>Choose with clarity</h3><p>Compare the details and make a more informed selection.</p></div></li>
+            <li><span>04</span><div><h3>Begin with intention</h3><p>Follow labeled directions and keep your new ritual simple.</p></div></li>
+            <li><span>05</span><div><h3>Observe and refine</h3><p>Notice how it fits and seek professional advice when needed.</p></div></li>
+          </ol>
+        </div>
       </section>
 
       <section id="testimonials" className="testimonials">
         <div className="shell testimonial-heading" data-reveal><div><span className="eyebrow light">The Kinsengs experience</span><h2 id="testimonial-title" className="split-title">Considered choices.<br />Personal conversations.</h2></div><p>We value clarity, calm, and guidance that never feels rushed.</p></div>
         <div className="testimonial-viewport" role="region" aria-labelledby="testimonial-title" tabIndex={0}><div className="testimonial-track">
-          {testimonialPreviews.map((item, index) => <article key={item.quote} className="testimonial-card"><div className="review-top"><Quote /><div role="img" aria-label="Five stars">{[...Array(5)].map((_, i) => <Star key={i} />)}</div></div><blockquote>“{item.quote}”</blockquote><footer><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.name}</strong><small>{item.context}</small></div></footer><em>Preview content — replace with verified customer feedback before publication.</em></article>)}
+          {testimonialPreviews.map((item, index) => <article key={item.quote} className="testimonial-card"><div className="review-top"><Quote /><div role="img" aria-label="Five stars">{[...Array(5)].map((_, i) => <Star key={i} />)}</div></div><blockquote>“{item.quote}”</blockquote><footer><span>{String(index + 1).padStart(2, '0')}</span><div><strong>{item.name}</strong><small>{item.context}</small></div></footer></article>)}
         </div></div>
       </section>
 
