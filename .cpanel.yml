@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html
+    - /bin/mkdir -p $DEPLOYPATH
+    - /bin/test -f $DEPLOYPATH/.htaccess -a ! -f $HOME/.kinsengs-wordpress-htaccess.backup && /bin/cp $DEPLOYPATH/.htaccess $HOME/.kinsengs-wordpress-htaccess.backup || /bin/true
+    - /bin/cp -a dist/. $DEPLOYPATH/

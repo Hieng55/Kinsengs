@@ -1,0 +1,24 @@
+DirectoryIndex index.html index.php
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Keep WordPress administration, media, AJAX, and system files available.
+  RewriteRule ^\.well-known(?:/|$) - [L]
+  RewriteRule ^wp-admin(?:/|$) - [L]
+  RewriteRule ^wp-login\.php$ - [L]
+  RewriteRule ^wp-cron\.php$ - [L]
+  RewriteRule ^xmlrpc\.php$ - [L]
+  RewriteRule ^wp-content(?:/|$) - [L]
+  RewriteRule ^wp-includes(?:/|$) - [L]
+
+  # Route the WooCommerce Store API through the existing WordPress backend.
+  RewriteRule ^wp-json/?$ index.php?rest_route=/ [QSA,L]
+  RewriteRule ^wp-json/(.*)$ index.php?rest_route=/$1 [QSA,L]
+
+  # Serve real files/directories, otherwise let React Router handle the URL.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  RewriteRule ^ index.html [L]
+</IfModule>

@@ -21,6 +21,12 @@ File build nằm trong `dist/`. Máy chủ cần cấu hình SPA fallback về `
 
 Nếu triển khai trên domain khác, đặt biến môi trường `VITE_WP_API_URL` và cấu hình CORS ở WordPress hoặc dùng reverse proxy cùng origin.
 
+## Deploy Vietnix cPanel
+
+Repository có `.cpanel.yml` để copy bản build đã commit từ `dist/` vào `$HOME/public_html` mà không xóa các thư mục WordPress. File `public/.htaccess` ưu tiên React ở frontend nhưng vẫn giữ `/wp-json`, `/wp-admin`, `/wp-content` và các file hệ thống WordPress hoạt động.
+
+Trong **cPanel > Git Version Control**, clone repository vào một thư mục ngoài `public_html`, chọn nhánh `master`, sau đó dùng **Update from Remote** và **Deploy HEAD Commit**. Lần deploy đầu tiên tự sao lưu `.htaccess` hiện tại vào `$HOME/.kinsengs-wordpress-htaccess.backup`.
+
 ## Luồng liên hệ
 
 Website không hiển thị giá, giỏ hàng hay nút mua. Luồng liên hệ ưu tiên gọi số `(346) 347-5571` qua liên kết `tel:+13463475571`; form email được giữ làm lựa chọn yêu cầu gọi lại. Có thể thay handler trong `src/App.jsx` bằng CRM/form endpoint chính thức khi endpoint đó sẵn sàng.
