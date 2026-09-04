@@ -79,7 +79,7 @@ export function Products() {
     const timer = window.setTimeout(() => {
       setDebouncedQuery(nextQuery);
       setSearchPending(false);
-    }, 2000);
+    }, 320);
     return () => window.clearTimeout(timer);
   }, [query]);
 

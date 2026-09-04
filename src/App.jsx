@@ -23,6 +23,40 @@ function SiteLoader() {
   );
 }
 
+function ScrollProgressBar() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let frame;
+    const updateProgress = () => {
+      const scrollY = window.scrollY || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = scrollHeight > 0 ? (scrollY / scrollHeight) * 100 : 0;
+      setProgress(Math.min(100, Math.max(0, pct)));
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(updateProgress);
+    };
+
+    updateProgress();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, []);
+
+  return (
+    <div className="site-scroll-progress" role="progressbar" aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100} aria-label="Page reading progress">
+      <div className="site-scroll-progress-bar" style={{ transform: `scaleX(${progress / 100})` }} />
+    </div>
+  );
+}
+
 function ScrollManager() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -272,9 +306,29 @@ function Footer() {
           <img src="https://kinsengs.com/wp-content/uploads/2026/09/logo-Kinsengs-1.png" alt="Kinsengs" />
           <p>Thoughtfully curated wellness essentials, presented with clarity and supported by personal guidance.</p>
         </div>
-        <nav aria-label="Footer products"><h4>Explore</h4><Link to="/products">All products</Link><a href="/#shop-by-need">Shop by need</a><a href="/#journal">Wellness journal</a></nav>
-        <nav aria-label="Footer company"><h4>Discover</h4><a href="/#our-story">Our philosophy</a><a href="/#testimonials">The experience</a><a href="/#faq">Frequently asked questions</a></nav>
-        <div className="footer-contact"><h4>Contact</h4><a href="tel:+13463475571">Call for personal guidance</a><small>We welcome questions before you choose.</small></div>
+        <nav aria-label="Footer products">
+          <h4>Explore</h4>
+          <Link to="/products">All products</Link>
+          <a href="/#shop-by-need">Shop by need</a>
+          <a href="/#journal">Wellness journal</a>
+        </nav>
+        <nav aria-label="Footer company">
+          <h4>Discover</h4>
+          <a href="/#our-story">Our philosophy</a>
+          <a href="/#testimonials">The experience</a>
+          <a href="/#faq">Frequently asked questions</a>
+        </nav>
+        <div className="footer-contact">
+          <h4>Contact & Guidance</h4>
+          <a className="footer-phone-direct" href="tel:+13463475571" aria-label="Call Kinsengs at 346 347 5571">
+            <span className="footer-phone-icon"><Phone size={18} /></span>
+            <div className="footer-phone-info">
+              <span className="footer-phone-label">Personal Concierge</span>
+              <strong>(346) 347-5571</strong>
+            </div>
+          </a>
+          <p className="footer-contact-note">We welcome all questions about ingredients and labeled directions before you choose.</p>
+        </div>
       </div>
       <div className="legal shell">
         <strong>These products are not medicines and are not intended to replace medical treatment.</strong>
@@ -310,6 +364,7 @@ export default function App() {
     <>
       {siteLoading && <SiteLoader />}
       <div className="site-view" aria-hidden={siteLoading}>
+        <ScrollProgressBar />
         <ScrollManager />
         <Header />
         <main>

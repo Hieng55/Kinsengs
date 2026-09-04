@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Activity, ArrowDown, ArrowRight, BadgeCheck, Bone, ChevronLeft, ChevronRight, Flower2, MoonStar, Phone, Quote, Sparkles, Star } from 'lucide-react';
 import gsap from 'gsap';
@@ -35,6 +35,12 @@ const faq = [
 export function Home() {
   const root = useRef(null);
   const [slide, setSlide] = useState(0);
+  const slideRef = useRef(0);
+  const isAnimating = useRef(false);
+  const isFirstRender = useRef(true);
+  const progressTween = useRef(null);
+  const touchStartX = useRef(null);
+  const touchStartY = useRef(null);
   const [mobileCarousel, setMobileCarousel] = useState(() => window.innerWidth <= 900 || window.matchMedia('(hover: none), (pointer: coarse)').matches);
   const { products, loading } = useProducts();
   const inCategory = (product, slug) => product.categories?.some((category) => category.slug === slug);
@@ -42,6 +48,109 @@ export function Home() {
   const hearbalBeautyProducts = products.filter((product) => inCategory(product, 'beauty'));
   const hearbalHealthProducts = products.filter((product) => inCategory(product, 'health'));
   const hearbalProducts = [...hearbalBeautyProducts.slice(0, 2), ...hearbalHealthProducts.slice(0, 2)];
+
+  const goToSlide = useCallback((targetIndex) => {
+    if (isAnimating.current || targetIndex === slideRef.current) return;
+    isAnimating.current = true;
+
+    if (progressTween.current) {
+      progressTween.current.kill();
+      gsap.set('.hero-progress-fill', { width: '0%' });
+    }
+
+    gsap.to(['.hero-eyebrow', '.hero-title', '.hero-copy-desc'], {
+      y: -18,
+      autoAlpha: 0,
+      duration: 0.28,
+      stagger: 0.025,
+      ease: 'power2.in',
+      onComplete: () => {
+        setSlide(targetIndex);
+      },
+    });
+  }, []);
+
+  const nextSlide = useCallback(() => {
+    const next = (slideRef.current + 1) % heroSlides.length;
+    goToSlide(next);
+  }, [goToSlide]);
+
+  const prevSlide = useCallback(() => {
+    const prev = (slideRef.current - 1 + heroSlides.length) % heroSlides.length;
+    goToSlide(prev);
+  }, [goToSlide]);
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    progressTween.current?.pause();
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        nextSlide();
+      } else {
+        prevSlide();
+      }
+    } else {
+      progressTween.current?.resume();
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+  };
+
+  const startProgressBar = useCallback(() => {
+    if (progressTween.current) progressTween.current.kill();
+    gsap.set('.hero-progress-fill', { width: '0%' });
+    progressTween.current = gsap.to('.hero-progress-fill', {
+      width: '100%',
+      duration: 6.5,
+      ease: 'linear',
+      onComplete: () => {
+        const next = (slideRef.current + 1) % heroSlides.length;
+        goToSlide(next);
+      },
+    });
+  }, [goToSlide]);
+
+  useEffect(() => {
+    slideRef.current = slide;
+
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      startProgressBar();
+      return;
+    }
+
+    gsap.fromTo(
+      ['.hero-eyebrow', '.hero-title', '.hero-copy-desc'],
+      { y: 26, autoAlpha: 0 },
+      {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.85,
+        stagger: 0.07,
+        ease: 'power3.out',
+        clearProps: 'transform',
+        onComplete: () => {
+          isAnimating.current = false;
+        },
+      }
+    );
+
+    startProgressBar();
+  }, [slide, startProgressBar]);
+
+  useEffect(() => {
+    return () => {
+      progressTween.current?.kill();
+    };
+  }, []);
+
   useEffect(() => {
     const mq = window.matchMedia('(hover: none), (pointer: coarse)');
     const update = () => setMobileCarousel(window.innerWidth <= 900 || mq.matches);
@@ -51,17 +160,18 @@ export function Home() {
     window.addEventListener('resize', update);
     return () => { if (mq.removeEventListener) mq.removeEventListener('change', listener); else mq.removeListener(listener); window.removeEventListener('resize', update); };
   }, []);
-  useEffect(() => {
-    const timer = setInterval(() => setSlide((value) => (value + 1) % heroSlides.length), 6500);
-    return () => clearInterval(timer);
-  }, []);
+
   useEffect(() => {
     const media = gsap.matchMedia();
     const ctx = gsap.context(() => {
       media.add('(prefers-reduced-motion: no-preference)', () => {
-        gsap.timeline({ defaults: { duration: 1, ease: 'power4.out' } })
-          .from('.hero-copy > *', { y: 45, autoAlpha: 0, stagger: .09 })
-          .from('.hero-controls, .scroll-cue', { y: 20, autoAlpha: 0, stagger: .08 }, '-=.6');
+        gsap.timeline({ delay: 0.4, defaults: { ease: 'power3.out' } })
+          .from('.hero-eyebrow', { y: 24, autoAlpha: 0, duration: 0.8, clearProps: 'opacity,visibility,transform' })
+          .from('.hero-title', { y: 38, autoAlpha: 0, duration: 0.95, clearProps: 'opacity,visibility,transform' }, '-=0.6')
+          .from('.hero-copy-desc', { y: 24, autoAlpha: 0, duration: 0.8, clearProps: 'opacity,visibility,transform' }, '-=0.65')
+          .from('.hero-buttons > *', { y: 20, autoAlpha: 0, duration: 0.8, stagger: 0.08, clearProps: 'opacity,visibility,transform' }, '-=0.55')
+          .from('.hero-controls, .scroll-cue', { y: 16, autoAlpha: 0, duration: 0.7, stagger: 0.08, clearProps: 'opacity,visibility,transform' }, '-=0.5');
+
         gsap.utils.toArray('[data-reveal]').filter((el) => !el.closest('.story-section, .ritual-section, .journal-grid')).forEach((el) => gsap.from(el, { y: 48, opacity: 0, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 88%', fastScrollEnd: true } }));
         gsap.fromTo('.editorial-frame', { clipPath: 'inset(12% 12% 12% 12% round 28px)' }, { clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none', scrollTrigger: { trigger: '.editorial-section', start: 'top 85%', end: 'center 35%', scrub: 1 } });
         gsap.fromTo('.editorial-image', { scale: 1.12, yPercent: -4 }, { scale: 1, yPercent: 5, ease: 'none', scrollTrigger: { trigger: '.editorial-section', start: 'top bottom', end: 'bottom top', scrub: 1 } });
@@ -223,7 +333,13 @@ export function Home() {
   return (
     <div ref={root}>
       <SEO title="Kinsengs — The Art of Mindful Wellness" description="Explore Kinsengs' curated wellness collection by need, understand every ingredient, and call for personal product guidance." path="/" schema={homeSchema} />
-      <section className="hero">
+      <section
+        className="hero"
+        onMouseEnter={() => progressTween.current?.pause()}
+        onMouseLeave={() => progressTween.current?.resume()}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         <div className="hero-slides">
           {heroSlides.map((item, index) => (
             <picture key={item.desktop} className={`hero-picture ${slide === index ? 'active' : ''}`}>
@@ -234,18 +350,24 @@ export function Home() {
         </div>
         <div className="hero-shade" />
         <div className="hero-copy shell">
-          <span className="eyebrow light">{heroSlides[slide].eyebrow}</span>
-          <h1 key={`title-${slide}`}>{heroSlides[slide].title}</h1>
-          <p>{heroSlides[slide].copy}</p>
+          <div className="hero-copy-inner">
+            <span className="eyebrow light hero-eyebrow">{heroSlides[slide].eyebrow}</span>
+            <h1 className="hero-title">{heroSlides[slide].title}</h1>
+            <p className="hero-copy-desc">{heroSlides[slide].copy}</p>
+          </div>
           <div className="hero-buttons">
             <Link className="button button-light" to="/products">Explore the collection <ArrowRight size={17} /></Link>
             <a className="button button-ghost" href="tel:+13463475571"><Phone size={17} /> Call Kinsengs</a>
           </div>
         </div>
         <div className="hero-controls">
-          <button onClick={() => setSlide((slide - 1 + heroSlides.length) % heroSlides.length)} aria-label="Previous slide"><ChevronLeft /></button>
-          <span>0{slide + 1}<i /><small>0{heroSlides.length}</small></span>
-          <button onClick={() => setSlide((slide + 1) % heroSlides.length)} aria-label="Next slide"><ChevronRight /></button>
+          <button onClick={prevSlide} aria-label="Previous slide"><ChevronLeft size={18} /></button>
+          <span>
+            0{slide + 1}
+            <i><span className="hero-progress-fill" /></i>
+            <small>0{heroSlides.length}</small>
+          </span>
+          <button onClick={nextSlide} aria-label="Next slide"><ChevronRight size={18} /></button>
         </div>
         <a href="#shop-by-need" className="scroll-cue">Discover <ArrowDown size={15} /></a>
       </section>
@@ -299,7 +421,6 @@ export function Home() {
             <figure className="story-visual">
               <img src="https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png" alt="Reishi products and selected botanicals from the Kinsengs collection" />
               <figcaption><span>01</span> Selected botanicals, presented with intention</figcaption>
-              <span className="story-monogram" aria-hidden="true">K.</span>
             </figure>
 
             <article className="story-narrative">
@@ -367,7 +488,7 @@ export function Home() {
       </section>
 
       <section id="journal" className="journal shell">
-        <div className="section-heading" data-reveal><div><span className="eyebrow">The Kinsengs Journal</span><h2>Understand more. Live well.</h2></div><span className="journal-mark">K.</span></div>
+        <div className="section-heading" data-reveal><div><span className="eyebrow">The Kinsengs Journal</span><h2>Understand more. Live well.</h2></div><p>Editorial reflections on botanical wisdom, thoughtful nutrition, and living well.</p></div>
         <div className="journal-grid">
           <article className="journal-main" data-reveal><div className="journal-image beauty-journal-image"><img src="https://kinsengs.com/wp-content/uploads/2026/09/beauty-girl-with-long-shiny-wavy-hair-beautiful-woman-model-with-curly-hairstyle-scaled.jpg" alt="A woman with long, radiant hair representing a considered beauty and wellness ritual" loading="lazy" /></div><span>Beauty & nutrition · 5 min read</span><h3>What does beauty from within mean in a balanced wellness ritual?</h3><p>Radiance is shaped by the whole routine: thoughtful nutrition, hydration, rest, and choices considered around your individual needs.</p></article>
           <div className="journal-list"><article data-reveal><span>Ingredient knowledge</span><h3>Reading a supplement label: five details worth noticing</h3><ArrowRight /></article><article data-reveal><span>Living in balance</span><h3>Why nutritional needs change throughout different stages of life</h3><ArrowRight /></article><article data-reveal><span>Proactive care</span><h3>When should you consult a professional before use?</h3><ArrowRight /></article></div>

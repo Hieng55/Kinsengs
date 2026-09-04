@@ -13,6 +13,8 @@ export function ProductDetail() {
   const product = products.find((p) => p.slug === slug);
   const root = useRef(null);
   const zoomLens = useRef(null);
+  const galleryTouchStartX = useRef(null);
+  const galleryTouchStartY = useRef(null);
   const [tab, setTab] = useState('detail');
   const [activeImage, setActiveImage] = useState(0);
   useEffect(() => {
@@ -60,6 +62,26 @@ export function ProductDetail() {
     lens.style.top = `${event.clientY - bounds.top}px`;
     lens.style.backgroundPosition = `${x}% ${y}%`;
   };
+  const onGalleryTouchStart = (e) => {
+    galleryTouchStartX.current = e.touches[0].clientX;
+    galleryTouchStartY.current = e.touches[0].clientY;
+  };
+
+  const onGalleryTouchEnd = (e) => {
+    if (galleryTouchStartX.current === null || images.length <= 1) return;
+    const deltaX = e.changedTouches[0].clientX - galleryTouchStartX.current;
+    const deltaY = e.changedTouches[0].clientY - galleryTouchStartY.current;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        selectImage((activeImage + 1) % images.length);
+      } else {
+        selectImage((activeImage - 1 + images.length) % images.length);
+      }
+    }
+    galleryTouchStartX.current = null;
+    galleryTouchStartY.current = null;
+  };
+
   return (
     <div className="detail-page" ref={root}>
       <SEO title={cleanName(product.name)} description={`Explore ${cleanName(product.name)} from the Kinsengs wellness collection. Review product information and call (346) 347-5571 for personal guidance.`} path={`/products/${product.slug}`} image={product.images?.[0]?.src} schema={productSchema} />
@@ -71,6 +93,8 @@ export function ProductDetail() {
             onMouseEnter={() => zoomLens.current?.classList.add('is-visible')}
             onMouseMove={moveZoomLens}
             onMouseLeave={() => zoomLens.current?.classList.remove('is-visible')}
+            onTouchStart={onGalleryTouchStart}
+            onTouchEnd={onGalleryTouchEnd}
           >
             <span className="gallery-note">Kinsengs curated selection</span>
             <img key={selectedImage?.src} src={selectedImage?.src} alt={`${cleanName(product.name)} — view ${activeImage + 1}`} onError={handleProductImageError} />
