@@ -25,7 +25,6 @@ export const heroSlides = [
 ];
 
 export const fallbackProducts = [
-  { id: 117, name: 'Forskolin Plus Collagen', slug: 'forskolin-plus-collagen-2', sku: '', description: '', short_description: '', prices: { price: '5500', regular_price: '5500', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 36, name: 'Health', slug: 'health' }, { id: 31, name: 'Weight Management', slug: 'weight-management' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png' }] },
   { id: 115, name: 'Lung Support', slug: 'lung-support', sku: '', description: '', short_description: '', prices: { price: '7000', regular_price: '7000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 39, name: 'Health', slug: 'health-tolip' }, { id: 27, name: 'Lung Health', slug: 'lung-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png' }] },
   { id: 89, name: 'MV Herbs Red Lingzhi (Nấm Linh Chi Đỏ)', slug: 'mv-herbs-red-lingzhi-nam-linh-chi-do', sku: '', description: '', short_description: '', prices: { price: '8000', regular_price: '8000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 37, name: 'Beauty', slug: 'beauty' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-11.jpg' }] },
   { id: 87, name: 'Viên Uống Sụn Vi Cá MV Herbal – 750mg | Hộp 100 Viên', slug: 'vien-uong-sun-vi-ca-mv-herbal-750mg-hop-100-vien', sku: '', description: '', short_description: '', prices: { price: '4100', regular_price: '4100', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 37, name: 'Beauty', slug: 'beauty' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-05.jpg' }] },
@@ -109,7 +108,7 @@ export const productMegaMenu = [
       { slug: 'women-health', name: "Women's Health", count: 12 },
       { slug: 'sleep-support', name: 'Sleep Support', count: 7 },
       { slug: 'detox-and-cleanse', name: 'Detox & Cleanse', count: 5 },
-      { slug: 'weight-management', name: 'Weight Management', count: 7 },
+      { slug: 'weight-management', name: 'Weight Management', count: 6 },
       { slug: 'hair-nail-and-skin', name: 'Hair, Skin & Nails', count: 5 },
       { slug: 'bone-and-joint-health', name: 'Bone & Joint Health', count: 1 },
       { slug: 'tea', name: 'Herbal Tea', count: 3 },
@@ -124,9 +123,9 @@ export const productMegaMenu = [
     slug: 'mv-hearbal',
     name: 'Mv Hearbal',
     collections: [
-      { slug: 'mv-hearbal', name: 'All Mv Hearbal', count: 14 },
+      { slug: 'mv-hearbal', name: 'All Mv Hearbal', count: 13 },
       { slug: 'beauty', name: 'Beauty', count: 2 },
-      { slug: 'health', name: 'Health', count: 12 },
+      { slug: 'health', name: 'Health', count: 11 },
     ],
   },
 ];
@@ -167,7 +166,7 @@ export function buildProductMegaMenu(categories = []) {
   ];
 
   const hearbalCollections = [
-    { slug: hearbalCat.slug, name: `All ${hearbalCat.name}`, count: hearbalCat.count || 14 },
+    { slug: hearbalCat.slug, name: `All ${hearbalCat.name}`, count: hearbalCat.count || 13 },
     ...hearbalCategories
       .filter((c) => c.slug !== hearbalCat.slug && c.slug !== 'mv-hearbal' && c.slug !== 'hearbal')
       .map((c) => ({
