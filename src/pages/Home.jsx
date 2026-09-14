@@ -419,7 +419,7 @@ export function Home() {
 
           <div className="story-composition">
             <figure className="story-visual">
-              <img src="https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png" alt="Reishi products and selected botanicals from the Kinsengs collection" />
+              <img src="https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-4.png" alt="Reishi products and selected botanicals from the Kinsengs collection" />
               <figcaption><span>01</span> Selected botanicals, presented with intention</figcaption>
             </figure>
 

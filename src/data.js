@@ -9,15 +9,15 @@ export const heroSlides = [
     copy: 'A curated collection of wellness essentials designed around your rhythm and individual needs.',
   },
   {
-    desktop: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png',
-    mobile: 'https://kinsengs.com/wp-content/uploads/2026/09/kinsengs-2.png',
+    desktop: 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-2.png',
+    mobile: 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-2.png',
     eyebrow: 'Your daily ritual',
     title: 'Nurture today. Flourish tomorrow.',
     copy: 'A proactive wellness journey that begins with understanding your body and making informed choices.',
   },
   {
-    desktop: 'https://kinsengs.com/wp-content/uploads/2026/09/mv-scaled.png',
-    mobile: 'https://kinsengs.com/wp-content/uploads/2026/09/kinsengs-1.png',
+    desktop: 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-1.png',
+    mobile: 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-1.png',
     eyebrow: 'Personal guidance',
     title: 'More than a product. A considered choice.',
     copy: 'Kinsengs brings clarity, confidence, and a more personal perspective to every choice.',
@@ -25,22 +25,27 @@ export const heroSlides = [
 ];
 
 export const fallbackProducts = [
+  { id: 117, name: 'Forskolin Plus Collagen', slug: 'forskolin-plus-collagen-2', sku: '', description: '', short_description: '', prices: { price: '5500', regular_price: '5500', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 36, name: 'Health', slug: 'health' }, { id: 31, name: 'Weight Management', slug: 'weight-management' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png' }] },
+  { id: 115, name: 'Lung Support', slug: 'lung-support', sku: '', description: '', short_description: '', prices: { price: '7000', regular_price: '7000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 39, name: 'Health', slug: 'health-tolip' }, { id: 27, name: 'Lung Health', slug: 'lung-health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png' }] },
+  { id: 89, name: 'MV Herbs Red Lingzhi (Nấm Linh Chi Đỏ)', slug: 'mv-herbs-red-lingzhi-nam-linh-chi-do', sku: '', description: '', short_description: '', prices: { price: '8000', regular_price: '8000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 37, name: 'Beauty', slug: 'beauty' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-11.jpg' }] },
+  { id: 87, name: 'Viên Uống Sụn Vi Cá MV Herbal – 750mg | Hộp 100 Viên', slug: 'vien-uong-sun-vi-ca-mv-herbal-750mg-hop-100-vien', sku: '', description: '', short_description: '', prices: { price: '4100', regular_price: '4100', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 37, name: 'Beauty', slug: 'beauty' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-05.jpg' }] },
+  { id: 83, name: 'Bio Flex Advance', slug: 'bio-flex-advance', sku: '', description: '', short_description: '', prices: { price: '6000', regular_price: '6000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 16, name: 'Bone and Joint Health', slug: 'bone-and-joint-health' }, { id: 39, name: 'Health', slug: 'health-tolip' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png' }] },
+  { id: 55, name: 'Royal Collagen CoQ10', slug: 'royal-collagen-coq10', sku: 'TN-13', description: '', short_description: '', prices: { price: '7000', regular_price: '7000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 19, name: 'Hair Nail and Skin', slug: 'hair-nail-and-skin' }, { id: 39, name: 'Health', slug: 'health-tolip' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-13.jpg' }] },
   { id: 107, name: 'NMN+', slug: 'nmn-2', sku: '', description: '', short_description: '', prices: { price: '0', regular_price: '0', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 36, name: 'Health', slug: 'health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/nmn-2.png' }] },
   { id: 91, name: 'Premium Cordyceps', slug: 'premium-cordyceps', sku: '', description: '', short_description: '', prices: { price: '0', regular_price: '0', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 36, name: 'Health', slug: 'health' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-05.jpg' }] },
-  { id: 89, name: 'MV Herbs Red Lingzhi', slug: 'mv-herbs-red-lingzhi', sku: '', description: '', short_description: '', prices: { price: '8500', regular_price: '8500', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 37, name: 'Beauty', slug: 'beauty' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-11.jpg' }] },
-  { id: 55, name: 'Royal Collagen CoQ10', slug: 'royal-collagen-coq10', sku: 'TN-13', description: '', short_description: '', prices: { price: '7000', regular_price: '7000', currency_code: 'USD', currency_minor_unit: 2 }, categories: [{ id: 19, name: 'Hair Nail and Skin', slug: 'hair-nail-and-skin' }, { id: 39, name: 'Health', slug: 'health-tolip' }], images: [{ src: 'https://kinsengs.com/wp-content/uploads/2026/09/tn-13.jpg' }] },
 ];
 
 export const needMap = [
-  ['general-health', 'Everyday vitality', 'Support daily balance and a more vibrant way of living.', '/images/botanical-editorial.jpg', 'Daily foundations'],
+  ['general-health', 'Everyday vitality', 'Support daily balance and a more vibrant way of living.', 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-5.png', 'Daily foundations'],
   ['bone-and-joint-health', 'Move with ease', 'Care for comfortable movement and an active lifestyle.', 'https://kinsengs.com/wp-content/uploads/2026/09/tolip-scaled.png', 'Mobility support'],
   ['hair-nail-and-skin', 'Beauty from within', 'Nourish hair, skin, and nails with selected nutrients.', 'https://kinsengs.com/wp-content/uploads/2026/09/pretty-cute-young-woman-model-with-bright-clean-skin-facial-treatment-cosmetology-beauty-scaled.jpg', 'Beauty nutrition'],
-  ['sleep-support', 'Rest & unwind', 'Rediscover a calmer, more natural rhythm of rest.', 'https://kinsengs.com/wp-content/uploads/2026/09/unlock-mysteries-traditional-herbal-medicine-tap-into-its-profound-healing-potential-passed-down-through-generations-generated-by-ai-scaled.jpg', 'Evening ritual'],
+  ['sleep-support', 'Rest & unwind', 'Rediscover a calmer, more natural rhythm of rest.', 'https://kinsengs.com/wp-content/uploads/2026/09/kingsengs-6.png', 'Evening ritual'],
 ];
 
 export const categoryMenu = [
   ['tolip', 'All Tolip', 'All products from the Tolip house.'],
   ['health-tolip', 'Tolip / Health', 'All Tolip health products.'],
+  ['mv-hearbal', 'All Hearbal', 'All products from the Hearbal house.'],
   ['hearbal', 'All Hearbal', 'All products from the Hearbal house.'],
   ['beauty', 'Hearbal / Beauty', 'All Hearbal beauty products.'],
   ['health', 'Hearbal / Health', 'All Hearbal health products.'],
@@ -78,12 +83,15 @@ const tolipHealthCategories = [
   'sexual-health',
   'sleep-support',
   'tea',
+  'weight-management',
+  'women-health',
 ];
 
 export const categoryDescendants = {
   tolip: tolipHealthCategories,
   'health-tolip': tolipHealthCategories,
-  hearbal: ['beauty', 'health'],
+  hearbal: ['mv-hearbal', 'beauty', 'health'],
+  'mv-hearbal': ['mv-hearbal', 'beauty', 'health'],
   beauty: ['beauty'],
   health: ['health'],
 };
@@ -133,11 +141,17 @@ export const translations = {
   'Heart Health': 'Heart Health',
   'Detox and Cleanse': 'Detox & Cleanse',
   'Weight Management': 'Weight Management',
+  'Men Health': "Men's Health",
+  'Women Health': "Women's Health",
   'Sleep Support': 'Sleep Support',
   'Eye Health': 'Eye Health',
   'Lung Health': 'Respiratory Health',
+  'Liver Health': 'Liver Health',
+  'Immune Support': 'Immune Support',
+  'Hemorrhoid Relief': 'Hemorrhoid Relief',
   Tea: 'Herbal Tea',
   'Sexual Health': 'Sexual Wellness',
+  'Mv Hearbal': 'Hearbal',
 };
 
 export const englishProductOverrides = {

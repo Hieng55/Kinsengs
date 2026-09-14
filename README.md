@@ -29,7 +29,7 @@ Trong **cPanel > Git Version Control**, clone repository vào một thư mục n
 
 ## Luồng liên hệ
 
-Website không hiển thị giá, giỏ hàng hay nút mua. Luồng liên hệ ưu tiên gọi số `(346) 347-5571` qua liên kết `tel:+13463475571`; form email được giữ làm lựa chọn yêu cầu gọi lại. Có thể thay handler trong `src/App.jsx` bằng CRM/form endpoint chính thức khi endpoint đó sẵn sàng.
+Website hiển thị giá sản phẩm được đồng bộ từ WooCommerce Store API (đối với các sản phẩm đã có giá niêm yết) và không có giỏ hàng hay nút thanh toán online. Luồng tư vấn và liên hệ ưu tiên gọi số `(346) 347-5571` qua liên kết `tel:+13463475571`; form email được giữ làm lựa chọn yêu cầu gọi lại. Có thể thay handler trong `src/App.jsx` bằng CRM/form endpoint chính thức khi endpoint đó sẵn sàng.
 
 ## Lưu ý nội dung
 

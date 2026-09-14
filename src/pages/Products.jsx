@@ -47,17 +47,17 @@ export function Products() {
   }, [products]);
   const categoryLabels = new Map(categories);
   const tolipCategorySlugs = ['tolip', ...categoryDescendants['health-tolip']];
-  const hearbalCategorySlugs = ['hearbal', 'beauty', 'health'];
+  const hearbalCategorySlugs = ['mv-hearbal', 'hearbal', 'beauty', 'health'];
   const groupedCategorySlugs = new Set([...tolipCategorySlugs, ...hearbalCategorySlugs]);
   const tolipCategoryOptions = tolipCategorySlugs.map((slug) => [slug, categoryLabels.get(slug)]).filter(([, name]) => name);
-  const hearbalCategoryOptions = hearbalCategorySlugs.map((slug) => [slug, categoryLabels.get(slug)]).filter(([, name]) => name);
+  const hearbalCategoryOptions = ['mv-hearbal', 'beauty', 'health'].map((slug) => [slug, categoryLabels.get(slug) || (slug === 'mv-hearbal' ? 'All Hearbal' : slug)]).filter(([, name]) => name);
   const otherCategoryOptions = categories.filter(([slug]) => !groupedCategorySlugs.has(slug));
   const activeCategoryLabel = categoryLabels.get(category) || category.replaceAll('-', ' ');
   const activeCategoryPath = category === 'all' ? ['All products']
     : category === 'tolip' ? ['Tolip']
       : category === 'health-tolip' ? ['Tolip', 'Health']
         : categoryDescendants['health-tolip'].includes(category) ? ['Tolip', 'Health', activeCategoryLabel]
-          : category === 'hearbal' ? ['Hearbal']
+          : (category === 'hearbal' || category === 'mv-hearbal') ? ['Hearbal']
             : category === 'beauty' ? ['Hearbal', 'Beauty']
               : category === 'health' ? ['Hearbal', 'Health']
                 : ['Wellness', activeCategoryLabel];
@@ -215,7 +215,7 @@ export function Products() {
         <div className="catalog-layout">
           <aside id="catalog-filters" className={`catalog-filters ${filtersOpen ? 'is-open' : ''}`}>
             <div className="filters-heading"><div><SlidersHorizontal size={17} /><strong>Refine selection</strong></div>{activeFilterCount > 0 && <button type="button" onClick={clearFilters}>Clear all</button>}</div>
-            <div className="filter-group"><label htmlFor="category-filter">Brand & category</label><select id="category-filter" value={category} onChange={(event) => chooseCategory(event.target.value)}><option value="all">All products</option><optgroup label="Tolip">{tolipCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'tolip' ? 'All Tolip' : slug === 'health-tolip' ? 'All Health' : name}</option>)}</optgroup><optgroup label="Hearbal">{hearbalCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'hearbal' ? 'All Hearbal' : name.replace('Hearbal / ', '')}</option>)}</optgroup>{otherCategoryOptions.length > 0 && <optgroup label="Other wellness categories">{otherCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</optgroup>}</select></div>
+            <div className="filter-group"><label htmlFor="category-filter">Brand & category</label><select id="category-filter" value={category} onChange={(event) => chooseCategory(event.target.value)}><option value="all">All products</option><optgroup label="Tolip">{tolipCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'tolip' ? 'All Tolip' : slug === 'health-tolip' ? 'All Health' : name}</option>)}</optgroup><optgroup label="Hearbal">{hearbalCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{slug === 'hearbal' || slug === 'mv-hearbal' ? 'All Hearbal' : name.replace('Hearbal / ', '')}</option>)}</optgroup>{otherCategoryOptions.length > 0 && <optgroup label="Other wellness categories">{otherCategoryOptions.map(([slug, name]) => <option key={slug} value={slug}>{name}</option>)}</optgroup>}</select></div>
             <fieldset className="filter-group price-filter"><legend>Price range</legend><div><label><span>Min</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder={`$${priceRange.min}`} /></label><i>—</i><label><span>Max</span><input type="number" min={priceRange.min} max={priceRange.max} step="1" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder={`$${priceRange.max}`} /></label></div></fieldset>
             <fieldset className="filter-group option-filter"><legend>Availability</legend><label><input type="radio" name="availability" value="all" checked={availability === 'all'} onChange={(event) => setAvailability(event.target.value)} /><span>All products</span></label><label><input type="radio" name="availability" value="in-stock" checked={availability === 'in-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>In stock</span></label><label><input type="radio" name="availability" value="out-of-stock" checked={availability === 'out-of-stock'} onChange={(event) => setAvailability(event.target.value)} /><span>Out of stock</span></label></fieldset>
             <fieldset className="filter-group option-filter"><legend>Offers</legend><label><input type="checkbox" checked={saleOnly} onChange={(event) => setSaleOnly(event.target.checked)} /><span>On sale only</span></label></fieldset>

@@ -12,14 +12,14 @@ const displayCategoryName = (category) => translations[category?.name] || catego
 export function productTaxonomy(product) {
   const categories = product.categories || [];
   const slugs = new Set(categories.map((category) => category.slug));
-  if (slugs.has('health-tolip')) {
-    const detail = categories.find((category) => category.slug !== 'health-tolip');
+  if (slugs.has('health-tolip') || slugs.has('tolip')) {
+    const detail = categories.find((category) => category.slug !== 'health-tolip' && category.slug !== 'tolip');
     return { brand: 'Tolip', collection: 'Health', detail: displayCategoryName(detail) };
   }
-  if (slugs.has('beauty') || slugs.has('health')) {
+  if (slugs.has('beauty') || slugs.has('health') || slugs.has('mv-hearbal') || slugs.has('hearbal')) {
     const collectionSlug = slugs.has('beauty') ? 'beauty' : 'health';
     const collection = collectionSlug === 'beauty' ? 'Beauty' : 'Health';
-    const detail = categories.find((category) => category.slug !== collectionSlug);
+    const detail = categories.find((category) => category.slug !== collectionSlug && category.slug !== 'mv-hearbal' && category.slug !== 'hearbal');
     return { brand: 'Hearbal', collection, detail: displayCategoryName(detail) };
   }
   return { brand: 'Kinsengs', collection: categoryName(product) };

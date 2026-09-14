@@ -11,7 +11,8 @@ const applyEnglishOverrides = (items) => items.map((product) => ({
 
 function loadProducts(category) {
   if (!pendingRequests.has(category)) {
-    const categoryQuery = category === 'all' ? '' : `&category=${encodeURIComponent(category)}`;
+    const apiCategory = category === 'hearbal' ? 'mv-hearbal' : category;
+    const categoryQuery = !apiCategory || apiCategory === 'all' ? '' : `&category=${encodeURIComponent(apiCategory)}`;
     const pendingRequest = fetch(`${API_URL}?per_page=100${categoryQuery}`)
       .then((response) => {
         if (!response.ok) throw new Error('Unable to load products');
