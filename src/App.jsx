@@ -359,6 +359,61 @@ function FloatingActions() {
   );
 }
 
+function PromoModal() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setOpen(true);
+    }, 2400);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    const onKey = (event) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="promo-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Special promotion"
+      onClick={() => setOpen(false)}
+    >
+      <div className="promo-modal-dialog" onClick={(event) => event.stopPropagation()}>
+        <button
+          className="promo-modal-close"
+          type="button"
+          onClick={() => setOpen(false)}
+          aria-label="Close promotion"
+        >
+          <X size={20} />
+        </button>
+        <Link
+          to="/products"
+          onClick={() => setOpen(false)}
+          className="promo-modal-link"
+          aria-label="Explore Kinsengs promotion"
+        >
+          <img
+            src="https://kinsengs.com/wp-content/uploads/2026/09/kinsengs-promo.png"
+            alt="Kinsengs Special Promotion"
+            className="promo-modal-img"
+          />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 function Footer() {
   return (
     <footer id="footer" className="footer">
@@ -459,6 +514,7 @@ export default function App() {
         </main>
         <Footer />
         <FloatingActions />
+        <PromoModal />
       </div>
     </>
   );
