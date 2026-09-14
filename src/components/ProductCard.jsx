@@ -76,7 +76,7 @@ export function ProductCard({ product, featured = false }) {
         <Link to={`/products/${product.slug}`}><h3>{cleanName(product.name)}</h3></Link>
         <div className="product-meta-footer">
           {price && <div className="product-price">{regularPrice && <del>{regularPrice}</del>}<strong>{price}</strong></div>}
-          <Link className="text-link" to={`/products/${product.slug}`}>Discover <ArrowUpRight size={14} /></Link>
+          <Link className="text-link" to={`/products/${product.slug}`} aria-label={`Discover ${cleanName(product.name)}`}><span className="text-link-label">Discover</span><ArrowUpRight size={14} /></Link>
         </div>
       </div>
     </article>
