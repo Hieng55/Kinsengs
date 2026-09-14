@@ -20,7 +20,7 @@ export function productTaxonomy(product) {
     const collectionSlug = slugs.has('beauty') ? 'beauty' : 'health';
     const collection = collectionSlug === 'beauty' ? 'Beauty' : 'Health';
     const detail = categories.find((category) => category.slug !== collectionSlug && category.slug !== 'mv-hearbal' && category.slug !== 'hearbal');
-    return { brand: 'Hearbal', collection, detail: displayCategoryName(detail) };
+    return { brand: 'Mv Hearbal', collection, detail: displayCategoryName(detail) };
   }
   return { brand: 'Kinsengs', collection: categoryName(product) };
 }

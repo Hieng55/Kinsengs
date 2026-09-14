@@ -45,10 +45,10 @@ export const needMap = [
 export const categoryMenu = [
   ['tolip', 'All Tolip', 'All products from the Tolip house.'],
   ['health-tolip', 'Tolip / Health', 'All Tolip health products.'],
-  ['mv-hearbal', 'All Hearbal', 'All products from the Hearbal house.'],
-  ['hearbal', 'All Hearbal', 'All products from the Hearbal house.'],
-  ['beauty', 'Hearbal / Beauty', 'All Hearbal beauty products.'],
-  ['health', 'Hearbal / Health', 'All Hearbal health products.'],
+  ['mv-hearbal', 'All Mv Hearbal', 'All products from the Mv Hearbal house.'],
+  ['hearbal', 'All Mv Hearbal', 'All products from the Mv Hearbal house.'],
+  ['beauty', 'Mv Hearbal / Beauty', 'All Mv Hearbal beauty products.'],
+  ['health', 'Mv Hearbal / Health', 'All Mv Hearbal health products.'],
   ['general-health', 'General Health', 'Everyday foundations for lasting vitality.'],
   ['bone-and-joint-health', 'Bone & Joint', 'Support comfortable, confident movement.'],
   ['hair-nail-and-skin', 'Hair, Skin & Nails', 'Beauty rituals designed from within.'],
@@ -101,27 +101,96 @@ export const productMegaMenu = [
     slug: 'tolip',
     name: 'Tolip',
     collections: [
-      {
-        slug: 'health-tolip',
-        name: 'Health',
-      },
+      { slug: 'health-tolip', name: 'All Health', count: 29 },
+      { slug: 'general-health', name: 'General Health', count: 12 },
+      { slug: 'immune-support', name: 'Immune Support', count: 11 },
+      { slug: 'heart-health', name: 'Heart Health', count: 8 },
+      { slug: 'men-health', name: "Men's Health", count: 12 },
+      { slug: 'women-health', name: "Women's Health", count: 12 },
+      { slug: 'sleep-support', name: 'Sleep Support', count: 7 },
+      { slug: 'detox-and-cleanse', name: 'Detox & Cleanse', count: 5 },
+      { slug: 'weight-management', name: 'Weight Management', count: 7 },
+      { slug: 'hair-nail-and-skin', name: 'Hair, Skin & Nails', count: 5 },
+      { slug: 'bone-and-joint-health', name: 'Bone & Joint Health', count: 1 },
+      { slug: 'tea', name: 'Herbal Tea', count: 3 },
+      { slug: 'lung-health', name: 'Respiratory Health', count: 2 },
+      { slug: 'eye-health', name: 'Eye Health', count: 2 },
+      { slug: 'sexual-health', name: 'Sexual Wellness', count: 12 },
+      { slug: 'liver-health', name: 'Liver Health', count: 1 },
+      { slug: 'hemorrhoid-relief', name: 'Hemorrhoid Relief', count: 1 },
     ],
   },
   {
-    slug: 'hearbal',
-    name: 'Hearbal',
+    slug: 'mv-hearbal',
+    name: 'Mv Hearbal',
     collections: [
-      {
-        slug: 'beauty',
-        name: 'Beauty',
-      },
-      {
-        slug: 'health',
-        name: 'Health',
-      },
+      { slug: 'mv-hearbal', name: 'All Mv Hearbal', count: 14 },
+      { slug: 'beauty', name: 'Beauty', count: 2 },
+      { slug: 'health', name: 'Health', count: 12 },
     ],
   },
 ];
+
+export function buildProductMegaMenu(categories = []) {
+  if (!categories || !categories.length) return productMegaMenu;
+  const tolipCat = categories.find((c) => c.slug === 'tolip') || { id: 38, name: 'Tolip', slug: 'tolip' };
+  const hearbalCat = categories.find((c) => c.slug === 'mv-hearbal' || c.slug === 'hearbal' || c.name?.toLowerCase().includes('hearbal') || c.name?.toLowerCase().includes('herbal')) || { id: 35, name: 'Mv Hearbal', slug: 'mv-hearbal' };
+  const tolipId = tolipCat.id;
+  const healthTolipId = categories.find((c) => c.slug === 'health-tolip')?.id || 39;
+
+  const tolipCategories = categories.filter((c) =>
+    c.parent === tolipId ||
+    c.parent === healthTolipId ||
+    c.slug === 'health-tolip' ||
+    c.slug === 'women-health' ||
+    c.slug === 'weight-management'
+  );
+
+  const hearbalCategories = categories.filter((c) =>
+    c.parent === hearbalCat.id ||
+    c.slug === 'beauty' ||
+    c.slug === 'health'
+  );
+
+  const cleanCategoryName = (c) => translations[c.name] || c.name.replaceAll('&#8211;', '–').replaceAll('&#038;', '&');
+
+  const tolipCollections = [
+    { slug: 'health-tolip', name: 'All Health', count: tolipCategories.find((c) => c.slug === 'health-tolip')?.count || tolipCat.count || 29 },
+    ...tolipCategories
+      .filter((c) => c.slug !== 'health-tolip' && c.slug !== 'tolip')
+      .map((c) => ({
+        slug: c.slug,
+        name: cleanCategoryName(c),
+        count: c.count,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+
+  const hearbalCollections = [
+    { slug: hearbalCat.slug, name: `All ${hearbalCat.name}`, count: hearbalCat.count || 14 },
+    ...hearbalCategories
+      .filter((c) => c.slug !== hearbalCat.slug && c.slug !== 'mv-hearbal' && c.slug !== 'hearbal')
+      .map((c) => ({
+        slug: c.slug,
+        name: cleanCategoryName(c),
+        count: c.count,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+
+  return [
+    {
+      slug: tolipCat.slug,
+      name: tolipCat.name,
+      collections: tolipCollections,
+    },
+    {
+      slug: hearbalCat.slug,
+      name: hearbalCat.name,
+      collections: hearbalCollections,
+    },
+  ];
+}
 
 export const testimonialPreviews = [
   { quote: 'The guidance made the ingredient list feel clear and approachable. I never felt rushed into a decision.', name: 'Emily R.', context: 'Personal product guidance' },
@@ -151,7 +220,6 @@ export const translations = {
   'Hemorrhoid Relief': 'Hemorrhoid Relief',
   Tea: 'Herbal Tea',
   'Sexual Health': 'Sexual Wellness',
-  'Mv Hearbal': 'Hearbal',
 };
 
 export const englishProductOverrides = {

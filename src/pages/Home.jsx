@@ -401,7 +401,7 @@ export function Home() {
 
       <section className="products-section brand-products brand-products-hearbal">
         <div className="shell">
-          <div className="brand-products-head" data-reveal><div><span className="eyebrow">Hearbal / Beauty & Health</span><h2>Botanical choices for beauty and vitality.</h2><p>A clear introduction to both Hearbal collections, with every product labeled by its place.</p></div><div className="brand-products-links"><Link to="/products?category=beauty">Beauty</Link><Link to="/products?category=health">Health</Link><Link className="outline-button" to="/products?category=hearbal">View all <ArrowRight size={16} /></Link></div></div>
+          <div className="brand-products-head" data-reveal><div><span className="eyebrow">Mv Hearbal / Beauty & Health</span><h2>Botanical choices for beauty and vitality.</h2><p>A clear introduction to both Mv Hearbal collections, with every product labeled by its place.</p></div><div className="brand-products-links"><Link to="/products?category=beauty">Beauty</Link><Link to="/products?category=health">Health</Link><Link className="outline-button" to="/products?category=mv-hearbal">View all <ArrowRight size={16} /></Link></div></div>
           <div className="product-grid home-collection-products" data-reveal>{loading ? [...Array(4)].map((_, index) => <div className="product-skeleton" key={index} />) : hearbalProducts.map((product) => <ProductCard key={product.id} product={product} />)}</div>
         </div>
       </section>

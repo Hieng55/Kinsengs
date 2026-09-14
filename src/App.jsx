@@ -1,12 +1,35 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, Routes, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUp, ChevronDown, ChevronRight, Flower2, HeartPulse, Leaf, Menu, Phone, Search, Sparkles, X } from 'lucide-react';
+import {
+  Activity,
+  ArrowRight,
+  ArrowUp,
+  Bone,
+  ChevronDown,
+  ChevronRight,
+  Coffee,
+  Eye,
+  Flame,
+  Flower2,
+  Heart,
+  HeartPulse,
+  Leaf,
+  Menu,
+  Moon,
+  Phone,
+  Scale,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Wind,
+  X,
+} from 'lucide-react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Home } from './pages/Home';
 import { Products } from './pages/Products';
 import { ProductDetail } from './pages/ProductDetail';
-import { productMegaMenu } from './data';
+import { buildProductMegaMenu, productMegaMenu } from './data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -70,9 +93,46 @@ function ScrollManager() {
   return null;
 }
 
-function ProductMegaMenu({ active = false }) {
+function getCollectionIcon(slug) {
+  switch (slug) {
+    case 'beauty':
+      return Flower2;
+    case 'bone-and-joint-health':
+      return Bone;
+    case 'detox-and-cleanse':
+      return Leaf;
+    case 'eye-health':
+      return Eye;
+    case 'hair-nail-and-skin':
+      return Sparkles;
+    case 'heart-health':
+      return Heart;
+    case 'immune-support':
+      return ShieldCheck;
+    case 'liver-health':
+      return ShieldCheck;
+    case 'lung-health':
+      return Wind;
+    case 'men-health':
+      return Activity;
+    case 'women-health':
+      return Sparkles;
+    case 'sexual-health':
+      return Flame;
+    case 'sleep-support':
+      return Moon;
+    case 'tea':
+      return Coffee;
+    case 'weight-management':
+      return Scale;
+    default:
+      return HeartPulse;
+  }
+}
+
+function ProductMegaMenu({ active = false, menu = productMegaMenu }) {
   const [activeBrandSlug, setActiveBrandSlug] = useState(null);
-  const activeBrand = productMegaMenu.find((brand) => brand.slug === activeBrandSlug);
+  const activeBrand = menu.find((brand) => brand.slug === activeBrandSlug);
 
   return (
     <div className="products-nav desktop-products-nav" onMouseLeave={() => setActiveBrandSlug(null)}>
@@ -86,7 +146,7 @@ function ProductMegaMenu({ active = false }) {
           <div className="catalog-mega-pane catalog-mega-brands">
             <span className="catalog-mega-kicker">01 / Choose a house</span>
             <div className="catalog-brand-list">
-              {productMegaMenu.map((brand, index) => (
+              {menu.map((brand, index) => (
                 <button
                   className={activeBrandSlug === brand.slug ? 'is-active' : ''}
                   type="button"
@@ -107,23 +167,29 @@ function ProductMegaMenu({ active = false }) {
           <div className="catalog-mega-pane catalog-mega-collections">
             <span className="catalog-mega-kicker">02 / Choose a collection</span>
             {activeBrand ? <>
-              <div className="catalog-mega-title"><span>{activeBrand.name}</span></div>
-              <div className="catalog-collection-list">
+              <div className="catalog-mega-title">
+                <span>{activeBrand.name}</span>
+                <small>{activeBrand.collections.length} {activeBrand.collections.length === 1 ? 'category' : 'categories'}</small>
+              </div>
+              <div className={`catalog-collection-list ${activeBrand.collections.length > 4 ? 'is-grid' : 'is-compact'}`}>
                 {activeBrand.collections.map((collection) => {
-                  const Icon = collection.slug === 'beauty' ? Flower2 : HeartPulse;
+                  const Icon = getCollectionIcon(collection.slug);
                   return (
                     <Link
                       key={collection.slug}
                       to={`/products?category=${collection.slug}`}
                     >
-                      <Icon size={20} />
-                      <strong>{collection.name}</strong>
-                      <ChevronRight size={17} />
+                      <Icon size={18} />
+                      <span className="collection-meta">
+                        <strong>{collection.name}</strong>
+                        {collection.count !== undefined && <small>{collection.count} {collection.count === 1 ? 'product' : 'products'}</small>}
+                      </span>
+                      <ChevronRight size={15} />
                     </Link>
                   );
                 })}
               </div>
-            </> : <div className="catalog-mega-prompt"><span>01</span><p>Hover Tolip or Hearbal.</p></div>}
+            </> : <div className="catalog-mega-prompt"><span>01</span><p>Hover a house to explore categories.</p></div>}
           </div>
         </div>
       </div>
@@ -138,7 +204,21 @@ function Header() {
   const [mobileBrandSlug, setMobileBrandSlug] = useState(null);
   const [scrolled, setScrolled] = useState(false);
   const [activeHomeSection, setActiveHomeSection] = useState('home');
-  const mobileBrand = productMegaMenu.find((brand) => brand.slug === mobileBrandSlug);
+  const [megaMenu, setMegaMenu] = useState(productMegaMenu);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/wp-json/wc/store/v1/products/categories?per_page=100')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((cats) => {
+        if (cats && active) {
+          setMegaMenu(buildProductMegaMenu(cats));
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const mobileBrand = megaMenu.find((brand) => brand.slug === mobileBrandSlug);
   const productsActive = location.pathname.startsWith('/products') || location.pathname.startsWith('/san-pham');
   const homeActive = location.pathname === '/' && activeHomeSection === 'home';
   const storyActive = location.pathname === '/' && activeHomeSection === 'our-story';
@@ -205,7 +285,7 @@ function Header() {
       <nav className={open ? 'nav-open' : ''} aria-label="Main navigation" aria-expanded={open}>
         <button className="nav-close" onClick={closeMenu} aria-label="Close menu"><X /></button>
         <Link className={homeActive ? 'is-active' : ''} to="/" onClick={closeMenu} aria-current={homeActive ? 'page' : undefined}>Home</Link>
-        <ProductMegaMenu active={productsActive} />
+        <ProductMegaMenu active={productsActive} menu={megaMenu} />
         <div className={`mobile-products-menu ${mobileProductsOpen ? 'is-open' : ''} ${productsActive ? 'nav-active' : ''}`}>
           <button
             className="mobile-products-trigger"
@@ -222,7 +302,7 @@ function Header() {
           <div className="mobile-products-dropdown" id="mobile-products-dropdown">
             <span className="mobile-products-label">Choose a house</span>
             <div className="mobile-product-brands">
-              {productMegaMenu.map((brand) => (
+              {megaMenu.map((brand) => (
                 <button
                   className={mobileBrandSlug === brand.slug ? 'is-active' : ''}
                   type="button"
@@ -237,7 +317,7 @@ function Header() {
             {mobileBrand && <div className="mobile-product-collections">
               <span>{mobileBrand.name}</span>
               {mobileBrand.collections.map((collection) => {
-                const Icon = collection.slug === 'beauty' ? Flower2 : HeartPulse;
+                const Icon = getCollectionIcon(collection.slug);
                 return <Link key={collection.slug} to={`/products?category=${collection.slug}`} onClick={closeMenu}><Icon size={18} /><strong>{collection.name}</strong><ArrowRight size={15} /></Link>;
               })}
             </div>}
