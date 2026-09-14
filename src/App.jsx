@@ -131,11 +131,11 @@ function getCollectionIcon(slug) {
 }
 
 function ProductMegaMenu({ active = false, menu = productMegaMenu }) {
-  const [activeBrandSlug, setActiveBrandSlug] = useState(null);
-  const activeBrand = menu.find((brand) => brand.slug === activeBrandSlug);
+  const [activeBrandSlug, setActiveBrandSlug] = useState('tolip');
+  const activeBrand = menu.find((brand) => brand.slug === activeBrandSlug) || menu[0];
 
   return (
-    <div className="products-nav desktop-products-nav" onMouseLeave={() => setActiveBrandSlug(null)}>
+    <div className="products-nav desktop-products-nav" onMouseLeave={() => setActiveBrandSlug(menu[0]?.slug || 'tolip')}>
       <Link className={active ? 'is-active' : ''} to="/products" aria-current={active ? 'page' : undefined}>Products</Link>
       <div className="mega-menu catalog-mega">
         <div className="catalog-mega-head">
