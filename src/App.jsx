@@ -404,7 +404,7 @@ function PromoModal() {
           aria-label="Explore Kinsengs promotion"
         >
           <img
-            src="https://kinsengs.com/wp-content/uploads/2026/09/kinsengs-promo.png"
+            src="/images/popup.png"
             alt="Kinsengs Special Promotion"
             className="promo-modal-img"
           />
