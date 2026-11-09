@@ -397,18 +397,18 @@ function PromoModal() {
         >
           <X size={20} />
         </button>
-        <Link
-          to="/products"
+        <a
+          href="tel:+13463475571"
           onClick={() => setOpen(false)}
           className="promo-modal-link"
-          aria-label="Explore Kinsengs promotion"
+          aria-label="Call Kinsengs at 346 347 5571 for the special offer"
         >
           <img
-            src="/images/popup.png"
-            alt="Kinsengs Special Promotion"
+            src="/images/popup.png?v=20261109"
+            alt="Kinsengs special offer: spend $200 and receive a personalized free gift. Call 346 347 5571."
             className="promo-modal-img"
           />
-        </Link>
+        </a>
       </div>
     </div>
   );
@@ -467,7 +467,10 @@ function Footer() {
       </div>
       <div className="legal shell">
         <strong>These products are not medicines and are not intended to replace medical treatment.</strong>
-        <span>© {new Date().getFullYear()} Kinsengs. All rights reserved. Design by Tdtransactionsllc.</span>
+        <span>
+          © {new Date().getFullYear()} Kinsengs. All rights reserved. Designed by TD Transactions LLC · Developed by{' '}
+          <a href="https://webs4v.vn/" target="_blank" rel="noopener noreferrer">Webs4V</a>
+        </span>
       </div>
     </footer>
   );

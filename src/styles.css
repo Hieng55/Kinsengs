@@ -240,6 +240,8 @@ section[id],footer[id]{scroll-margin-top:88px}
 .legal{display:flex;justify-content:space-between;align-items:center;padding:24px 0 28px;border-top:1px solid rgba(255,255,255,.14);font-size:13px;letter-spacing:.02em;color:rgba(255,255,255,.6);gap:30px}
 .legal strong{max-width:680px;font-weight:400;color:rgba(255,255,255,.82);line-height:1.6}
 .legal span{font-size:13px;color:rgba(255,255,255,.55)}
+.legal span a{color:inherit;text-decoration:underline;text-underline-offset:3px;transition:color .2s ease}
+.legal span a:hover{color:#fff}
 @media(max-width:1000px){
   .footer-call{grid-template-columns:1fr;padding:85px 0 70px}
   .footer-call-copy,.footer-call-card{grid-column:1}
